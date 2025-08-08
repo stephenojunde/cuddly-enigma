@@ -10,41 +10,23 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { login } from '@/app/auth/actions'
 
 function LoginForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const router = useRouter()
   const searchParams = useSearchParams()
   
-  // Check for configuration errors
-  const configError = searchParams.get('error') === 'configuration'
-  const authError = searchParams.get('error') === 'auth_error'
+  // Check for URL parameters
+  const urlError = searchParams.get('error')
+  const message = searchParams.get('message')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (formData: FormData) => {
     setIsLoading(true)
     setError('')
 
     try {
-      const formData = new FormData()
-      formData.append('email', email)
-      formData.append('password', password)
-      
-      const result = await signInWithPassword(formData)
-      
-      if (result?.error) {
-        setError(result.error)
-      } else {
-        router.push('/dashboard')
-      }
+      await login(formData)
     } catch (err) {
       console.error('Login error:', err)
-      if (err instanceof Error && err.message.includes('environment variable')) {
-        setError('Application configuration error. Please contact support.')
-      } else {
-        setError('An unexpected error occurred. Please try again.')
-      }
+      setError('Login failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -60,18 +42,20 @@ function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {configError && (
+          {urlError && (
             <Alert className="mb-4 border-red-200 bg-red-50">
               <AlertDescription className="text-red-800">
-                Application configuration error. Missing environment variables. Please contact support.
+                {urlError === 'Invalid credentials' ? 'Invalid email or password. Please try again.' : 
+                 urlError === 'Login failed' ? 'Login failed. Please try again.' :
+                 'An error occurred. Please try again.'}
               </AlertDescription>
             </Alert>
           )}
           
-          {authError && (
-            <Alert className="mb-4 border-yellow-200 bg-yellow-50">
-              <AlertDescription className="text-yellow-800">
-                Authentication error occurred. Please try logging in again.
+          {message && (
+            <Alert className="mb-4 border-green-200 bg-green-50">
+              <AlertDescription className="text-green-800">
+                {message}
               </AlertDescription>
             </Alert>
           )}
@@ -84,17 +68,17 @@ function LoginForm() {
             </Alert>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form action={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
+                className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
               />
             </div>
             
@@ -102,19 +86,19 @@ function LoginForm() {
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
               />
             </div>
 
             <Button 
               type="submit" 
-              className="w-full" 
-              disabled={isLoading || configError}
+              className="w-full bg-[#8A2BE1] hover:bg-[#5d1a9a]" 
+              disabled={isLoading}
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
@@ -123,7 +107,7 @@ function LoginForm() {
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               Don&apos;t have an account?{' '}
-              <a href="/signup" className="text-blue-600 hover:underline">
+              <a href="/signup" className="text-[#8A2BE1] hover:text-[#5d1a9a] font-medium">
                 Sign up
               </a>
             </p>

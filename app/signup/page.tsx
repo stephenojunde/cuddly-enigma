@@ -3,9 +3,18 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import Link from 'next/link'
 
-export default function SignupPage() {
+interface SignupPageProps {
+  searchParams: {
+    error?: string
+    message?: string
+  }
+}
+
+export default function SignupPage({ searchParams }: SignupPageProps) {
+  const { error, message } = searchParams
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
@@ -16,6 +25,24 @@ export default function SignupPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <Alert className="mb-4 border-red-200 bg-red-50">
+              <AlertDescription className="text-red-800">
+                {error === 'Could not create account' ? 'Failed to create account. Please check your email and try again.' :
+                 error === 'Signup failed' ? 'Signup failed. Please try again.' :
+                 'An error occurred during signup. Please try again.'}
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {message && (
+            <Alert className="mb-4 border-green-200 bg-green-50">
+              <AlertDescription className="text-green-800">
+                {message}
+              </AlertDescription>
+            </Alert>
+          )}
+
           <form className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -37,7 +64,20 @@ export default function SignupPage() {
                 type="password"
                 autoComplete="new-password"
                 required
-                placeholder="Create a password"
+                placeholder="Create a password (min. 6 characters)"
+                minLength={6}
+                className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                placeholder="Confirm your password"
                 minLength={6}
                 className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
               />
