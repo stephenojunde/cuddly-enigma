@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Star, MapPin, Clock, GraduationCap } from 'lucide-react'
 import { safeString, safeNumber, safeArray } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 interface TutorDetailPageProps {
   params: {
     id: string

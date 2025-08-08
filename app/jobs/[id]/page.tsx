@@ -7,6 +7,8 @@ import { MapPin, Calendar, Clock, DollarSign, Building } from 'lucide-react'
 import { JobApplicationForm } from '@/components/job-application-form'
 import { safeString, safeNumber, safeDate } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 interface JobDetailPageProps {
   params: {
     id: string

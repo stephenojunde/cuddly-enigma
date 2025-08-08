@@ -2,6 +2,8 @@ import { createClient } from '@/lib/server'
 import { redirect } from 'next/navigation'
 import { AdminSignupForm } from '@/components/admin-signup-form'
 
+export const dynamic = 'force-dynamic'
+
 interface AdminSignupPageProps {
   searchParams: {
     code?: string
