@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -8,11 +7,17 @@ import Link from 'next/link'
 interface AdminDashboardProps {
   user: any
   profile: any
+  stats: {
+    totalUsers: number
+    totalTutors: number
+    totalSchools: number
+    totalJobs: number
+    pendingApplications: number
+    unreadMessages: number
+  }
 }
 
-export async function AdminDashboard({ user, profile }: AdminDashboardProps) {
-  const supabase = await createClient()
-
+export function AdminDashboard({ user, profile, stats }: AdminDashboardProps) {
   // Only allow access to verified admins
   if (!profile.is_admin) {
     return (
@@ -23,33 +28,6 @@ export async function AdminDashboard({ user, profile }: AdminDashboardProps) {
       </div>
     )
   }
-
-  // Fetch system statistics
-  const { data: totalUsers } = await supabase
-    .from('profiles')
-    .select('id', { count: 'exact' })
-
-  const { data: totalTutors } = await supabase
-    .from('tutors')
-    .select('id', { count: 'exact' })
-
-  const { data: totalSchools } = await supabase
-    .from('schools')
-    .select('id', { count: 'exact' })
-
-  const { data: totalJobs } = await supabase
-    .from('jobs')
-    .select('id', { count: 'exact' })
-
-  const { data: pendingApplications } = await supabase
-    .from('tutor_applications')
-    .select('id', { count: 'exact' })
-    .eq('status', 'pending')
-
-  const { data: unreadMessages } = await supabase
-    .from('contact_messages')
-    .select('id', { count: 'exact' })
-    .eq('is_read', false)
 
   return (
     <div className="space-y-6">
@@ -70,7 +48,7 @@ export async function AdminDashboard({ user, profile }: AdminDashboardProps) {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalUsers?.length || 0}</div>
+            <div className="text-2xl font-bold">{stats.totalUsers}</div>
             <p className="text-xs text-muted-foreground">
               Registered users
             </p>
@@ -83,7 +61,7 @@ export async function AdminDashboard({ user, profile }: AdminDashboardProps) {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalTutors?.length || 0}</div>
+            <div className="text-2xl font-bold">{stats.totalTutors}</div>
             <p className="text-xs text-muted-foreground">
               Verified tutors
             </p>
@@ -96,7 +74,7 @@ export async function AdminDashboard({ user, profile }: AdminDashboardProps) {
             <Database className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalSchools?.length || 0}</div>
+            <div className="text-2xl font-bold">{stats.totalSchools}</div>
             <p className="text-xs text-muted-foreground">
               Registered schools
             </p>
@@ -109,7 +87,7 @@ export async function AdminDashboard({ user, profile }: AdminDashboardProps) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalJobs?.length || 0}</div>
+            <div className="text-2xl font-bold">{stats.totalJobs}</div>
             <p className="text-xs text-muted-foreground">
               Total job listings
             </p>
@@ -131,7 +109,7 @@ export async function AdminDashboard({ user, profile }: AdminDashboardProps) {
                   <p className="text-sm text-gray-600">Pending verification</p>
                 </div>
                 <Badge variant="destructive">
-                  {pendingApplications?.length || 0}
+                  {stats.pendingApplications}
                 </Badge>
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
@@ -140,7 +118,7 @@ export async function AdminDashboard({ user, profile }: AdminDashboardProps) {
                   <p className="text-sm text-gray-600">Unread inquiries</p>
                 </div>
                 <Badge variant="secondary">
-                  {unreadMessages?.length || 0}
+                  {stats.unreadMessages}
                 </Badge>
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
@@ -167,7 +145,7 @@ export async function AdminDashboard({ user, profile }: AdminDashboardProps) {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">API Response Time</span>
-                <span className="text-sm text-green-600">< 200ms</span>
+                <span className="text-sm text-green-600">&lt; 200ms</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Active Sessions</span>

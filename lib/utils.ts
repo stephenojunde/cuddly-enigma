@@ -53,3 +53,17 @@ export function safeAccess<T>(obj: any, path: string[], defaultValue: T): T {
     return defaultValue
   }
 }
+
+export function safeDate(value: any, fallback: string = ''): string {
+  if (!value) return fallback
+  
+  try {
+    const date = new Date(value)
+    if (isNaN(date.getTime())) {
+      return fallback
+    }
+    return date.toISOString().split('T')[0] // Return YYYY-MM-DD format
+  } catch {
+    return fallback
+  }
+}

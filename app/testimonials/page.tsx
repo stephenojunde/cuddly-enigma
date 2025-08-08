@@ -2,6 +2,8 @@ import { createClient } from '@/lib/server'
 import { Star } from 'lucide-react'
 import { safeString, safeNumber } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export default async function TestimonialsPage() {
   const supabase = await createClient()
   

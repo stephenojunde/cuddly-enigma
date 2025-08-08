@@ -2,6 +2,8 @@ import { createClient } from '@/lib/server'
 import { redirect } from 'next/navigation'
 import { UserManagement } from '@/components/user-management'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminUsersPage() {
   const supabase = await createClient()
 

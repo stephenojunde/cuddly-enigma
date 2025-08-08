@@ -2,6 +2,8 @@ import { createClient } from '@/lib/server'
 import { redirect } from 'next/navigation'
 import { ContentManagement } from '@/components/content-management'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminContentPage() {
   const supabase = await createClient()
 

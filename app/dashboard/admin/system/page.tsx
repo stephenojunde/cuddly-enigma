@@ -2,6 +2,8 @@ import { createClient } from '@/lib/server'
 import { redirect } from 'next/navigation'
 import { SystemMonitoring } from '@/components/system-monitoring'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminSystemPage() {
   const supabase = await createClient()
 

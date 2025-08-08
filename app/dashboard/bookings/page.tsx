@@ -2,6 +2,8 @@ import { createClient } from '@/lib/server'
 import { redirect } from 'next/navigation'
 import { BookingManager } from '@/components/booking-manager'
 
+export const dynamic = 'force-dynamic'
+
 export default async function BookingsPage() {
   const supabase = await createClient()
 

@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/server'
 import { safeString } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export default async function SchoolsPage() {
   const supabase = await createClient()
   

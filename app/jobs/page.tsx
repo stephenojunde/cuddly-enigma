@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { safeString, safeNumber } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export default async function JobsPage() {
   const supabase = await createClient()
   

@@ -2,6 +2,8 @@ import { createClient } from '@/lib/server'
 import { redirect } from 'next/navigation'
 import { AdminInviteManager } from '@/components/admin-invite-manager'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminInvitesPage() {
   const supabase = await createClient()
 
