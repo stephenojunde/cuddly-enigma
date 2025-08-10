@@ -8,14 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Link from 'next/link'
 
 interface SignupPageProps {
-  searchParams: {
+  searchParams: Promise<{
     error?: string
     message?: string
-  }
+  }>
 }
 
-export default function SignupPage({ searchParams }: SignupPageProps) {
-  const { error, message } = searchParams
+export default async function SignupPage({ searchParams }: SignupPageProps) {
+  const { error, message } = await searchParams
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
@@ -29,9 +29,7 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
           {error && (
             <Alert className="mb-4 border-red-200 bg-red-50">
               <AlertDescription className="text-red-800">
-                {error === 'Could not create account' ? 'Failed to create account. Please check your email and try again.' :
-                 error === 'Signup failed' ? 'Signup failed. Please try again.' :
-                 'An error occurred during signup. Please try again.'}
+                {error}
               </AlertDescription>
             </Alert>
           )}
@@ -85,16 +83,17 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
 
             <div className="space-y-2">
               <Label htmlFor="userType">I am a...</Label>
-              <Select name="userType" required>
-                <SelectTrigger className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]">
-                  <SelectValue placeholder="Select your role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="parent">Parent/Student - Looking for tutoring services</SelectItem>
-                  <SelectItem value="teacher">Teacher/Tutor - Offering tutoring services</SelectItem>
-                  <SelectItem value="school">School Administrator - Managing school needs</SelectItem>
-                </SelectContent>
-              </Select>
+              <select
+                id="userType"
+                name="userType"
+                required
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
+              >
+                <option value="">Select your role</option>
+                <option value="parent">Parent/Student - Looking for tutoring services</option>
+                <option value="teacher">Teacher/Tutor - Offering tutoring services</option>
+                <option value="school">School Administrator - Managing school needs</option>
+              </select>
               <p className="text-sm text-gray-500">
                 Choose the role that best describes you. You can update this later.
               </p>

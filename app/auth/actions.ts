@@ -56,26 +56,35 @@ export async function signup(formData: FormData) {
     const userType = formData.get('userType') as string
     const phone = formData.get('phone') as string
 
+    console.log('Signup attempt for:', email, 'with role:', userType)
+
     // Basic validation
     if (!email || !password || !confirmPassword || !firstName || !lastName || !userType) {
+      console.log('Validation failed: Missing required fields')
       redirect('/signup?error=All required fields must be filled')
     }
 
     if (!email.includes('@')) {
+      console.log('Validation failed: Invalid email format')
       redirect('/signup?error=Please enter a valid email address')
     }
 
     if (password.length < 6) {
+      console.log('Validation failed: Password too short')
       redirect('/signup?error=Password must be at least 6 characters long')
     }
 
     if (password !== confirmPassword) {
+      console.log('Validation failed: Passwords do not match')
       redirect('/signup?error=Passwords do not match')
     }
 
     if (!['parent', 'teacher', 'school'].includes(userType)) {
+      console.log('Validation failed: Invalid user type:', userType)
       redirect('/signup?error=Please select a valid user type')
     }
+
+    console.log('Validation passed, creating user account...')
 
     // Create the user account
     const { data, error } = await supabase.auth.signUp({
@@ -92,21 +101,32 @@ export async function signup(formData: FormData) {
     })
 
     if (error) {
-      console.error('Signup error:', error)
+      console.error('Supabase signup error:', error)
+      console.error('Error details:', {
+        message: error.message,
+        status: error.status,
+        name: error.name
+      })
+      
       if (error.message.includes('User already registered')) {
         redirect('/signup?error=An account with this email already exists')
       } else if (error.message.includes('Password should be at least')) {
         redirect('/signup?error=Password is too weak')
+      } else if (error.message.includes('Unable to validate email address')) {
+        redirect('/signup?error=Invalid email address format')
       } else {
-        redirect('/signup?error=Could not create account')
+        redirect(`/signup?error=Signup error: ${error.message}`)
       }
     }
 
+    console.log('Supabase response:', { user: data.user?.id, session: !!data.session })
+
     if (data.user) {
-      console.log('Signup successful for user:', data.user.email)
+      console.log('Signup successful for user:', data.user.email, 'ID:', data.user.id)
       
-      // Create user profile in the profiles table
+      // Try to create user profile in the profiles table (optional)
       try {
+        console.log('Attempting to create profile...')
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
@@ -122,22 +142,30 @@ export async function signup(formData: FormData) {
 
         if (profileError) {
           console.error('Profile creation error:', profileError)
-          // Don't fail the signup if profile creation fails
+          console.log('Profile creation failed, but continuing with signup...')
+        } else {
+          console.log('Profile created successfully')
         }
       } catch (profileError) {
-        console.error('Profile creation error:', profileError)
-        // Don't fail the signup if profile creation fails
+        console.error('Profile creation exception:', profileError)
+        console.log('Profile creation failed, but continuing with signup...')
       }
 
+      console.log('Redirecting to dashboard...')
       revalidatePath('/', 'layout')
       redirect('/dashboard?message=Account created successfully! Welcome to Tutelage Services.')
     } else {
-      console.log('Signup failed: No user data returned')
-      redirect('/signup?error=Signup failed')
+      console.log('Signup failed: No user data returned from Supabase')
+      console.log('Full response data:', data)
+      redirect('/signup?error=Account creation failed - no user data returned')
     }
   } catch (error) {
-    console.error('Signup error:', error)
-    redirect('/signup?error=Signup failed')
+    console.error('Signup exception:', error)
+    console.error('Exception details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    })
+    redirect('/signup?error=An unexpected error occurred during signup')
   }
 }
 

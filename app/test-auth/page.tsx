@@ -49,6 +49,12 @@ export default async function TestAuthPage() {
             <a href="/login" className="block w-full text-center bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
               Test Login
             </a>
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <h4 className="font-semibold text-yellow-900 mb-2">Debug Info:</h4>
+              <p className="text-sm text-yellow-800">
+                Check the browser console and server logs for detailed error messages during signup.
+              </p>
+            </div>
           </div>
         </div>
       </div>
