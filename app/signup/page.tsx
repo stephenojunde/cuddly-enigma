@@ -7,14 +7,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import Link from 'next/link'
 
 interface SignupPageProps {
-  searchParams: {
+  searchParams: Promise<{
     error?: string
     message?: string
-  }
+  }>
 }
 
-export default function SignupPage({ searchParams }: SignupPageProps) {
-  const { error, message } = searchParams
+export default async function SignupPage({ searchParams }: SignupPageProps) {
+  const { error, message } = await searchParams
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
@@ -86,6 +86,12 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
               Create Account
             </Button>
           </form>
+          
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-800">
+              📧 After creating your account, you'll receive a confirmation email. Please check your inbox (and spam folder) and click the confirmation link before signing in.
+            </p>
+          </div>
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/login" className="text-[#8A2BE1] hover:text-[#5d1a9a] font-medium">

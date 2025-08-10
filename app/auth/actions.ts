@@ -37,8 +37,12 @@ export async function login(formData: FormData) {
     }
 
     if (data.user) {
+      console.log('Login successful for user:', data.user.email)
       revalidatePath('/', 'layout')
       redirect('/dashboard')
+    } else {
+      console.log('Login failed: No user data returned')
+      redirect('/login?error=Login failed')
     }
   } catch (error) {
     console.error('Login error:', error)
@@ -91,8 +95,12 @@ export async function signup(formData: FormData) {
     }
 
     if (data.user) {
+      console.log('Signup successful for user:', data.user.email)
       revalidatePath('/', 'layout')
-      redirect('/login?message=Check your email to confirm your account before signing in')
+      redirect('/login?message=Account created successfully! Please check your email (including spam folder) and click the confirmation link before signing in.')
+    } else {
+      console.log('Signup failed: No user data returned')
+      redirect('/signup?error=Signup failed')
     }
   } catch (error) {
     console.error('Signup error:', error)
@@ -109,5 +117,46 @@ export async function signout() {
   } catch (error) {
     console.error('Signout error:', error)
     redirect('/')
+  }
+}
+
+export async function resendConfirmation(formData: FormData) {
+  try {
+    const supabase = await createClient()
+
+    const email = formData.get('email') as string
+
+    // Basic validation
+    if (!email) {
+      redirect('/resend-confirmation?error=Email is required')
+    }
+
+    if (!email.includes('@')) {
+      redirect('/resend-confirmation?error=Invalid email')
+    }
+
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+      }
+    })
+
+    if (error) {
+      console.error('Resend confirmation error:', error)
+      if (error.message.includes('User not found')) {
+        redirect('/resend-confirmation?error=User not found')
+      } else if (error.message.includes('Email already confirmed')) {
+        redirect('/resend-confirmation?error=Email already confirmed')
+      } else {
+        redirect('/resend-confirmation?error=Failed to resend confirmation')
+      }
+    }
+
+    redirect('/resend-confirmation?message=Confirmation email sent! Please check your inbox and spam folder.')
+  } catch (error) {
+    console.error('Resend confirmation error:', error)
+    redirect('/resend-confirmation?error=Failed to resend confirmation')
   }
 }
