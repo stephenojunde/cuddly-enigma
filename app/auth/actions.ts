@@ -29,20 +29,14 @@ export async function login(formData: FormData) {
       console.error('Login error:', error)
       if (error.message.includes('Invalid login credentials')) {
         redirect('/login?error=Invalid credentials')
-      } else if (error.message.includes('Email not confirmed')) {
-        redirect('/login?error=Please check your email and confirm your account')
       } else {
         redirect('/login?error=Login failed')
       }
     }
 
     if (data.user) {
-      console.log('Login successful for user:', data.user.email)
       revalidatePath('/', 'layout')
       redirect('/dashboard')
-    } else {
-      console.log('Login failed: No user data returned')
-      redirect('/login?error=Login failed')
     }
   } catch (error) {
     console.error('Login error:', error)
@@ -57,10 +51,14 @@ export async function signup(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const confirmPassword = formData.get('confirmPassword') as string
+    const firstName = formData.get('firstName') as string
+    const lastName = formData.get('lastName') as string
+    const userType = formData.get('userType') as string
+    const phone = formData.get('phone') as string
 
     // Basic validation
-    if (!email || !password || !confirmPassword) {
-      redirect('/signup?error=All fields are required')
+    if (!email || !password || !confirmPassword || !firstName || !lastName || !userType) {
+      redirect('/signup?error=All required fields must be filled')
     }
 
     if (!email.includes('@')) {
@@ -75,11 +73,21 @@ export async function signup(formData: FormData) {
       redirect('/signup?error=Passwords do not match')
     }
 
+    if (!['parent', 'teacher', 'school'].includes(userType)) {
+      redirect('/signup?error=Please select a valid user type')
+    }
+
+    // Create the user account
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          user_type: userType,
+          phone: phone || null
+        }
       }
     })
 
@@ -96,8 +104,33 @@ export async function signup(formData: FormData) {
 
     if (data.user) {
       console.log('Signup successful for user:', data.user.email)
+      
+      // Create user profile in the profiles table
+      try {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            email: email,
+            first_name: firstName,
+            last_name: lastName,
+            user_type: userType,
+            phone: phone || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          // Don't fail the signup if profile creation fails
+        }
+      } catch (profileError) {
+        console.error('Profile creation error:', profileError)
+        // Don't fail the signup if profile creation fails
+      }
+
       revalidatePath('/', 'layout')
-      redirect('/login?message=Account created successfully! Please check your email (including spam folder) and click the confirmation link before signing in.')
+      redirect('/dashboard?message=Account created successfully! Welcome to Tutelage Services.')
     } else {
       console.log('Signup failed: No user data returned')
       redirect('/signup?error=Signup failed')

@@ -34,8 +34,15 @@ async function getAdminStats(supabase: any) {
   }
 }
 
-export default async function DashboardPage() {
+interface DashboardPageProps {
+  searchParams: Promise<{
+    message?: string
+  }>
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   try {
+    const { message } = await searchParams
     const supabase = await createClient()
 
     const {
@@ -48,7 +55,7 @@ export default async function DashboardPage() {
       redirect('/login')
     }
 
-    // Try to get user profile, but don't fail if it doesn't exist
+    // Try to get user profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -62,6 +69,11 @@ export default async function DashboardPage() {
         <div className="min-h-screen bg-gray-50 py-12">
           <div className="container mx-auto px-6">
             <div className="max-w-4xl mx-auto">
+              {message && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
+                  <p className="text-green-800">{message}</p>
+                </div>
+              )}
               <div className="bg-white rounded-lg shadow-md p-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-6">Welcome to Your Dashboard</h1>
                 <div className="space-y-4">
@@ -69,14 +81,14 @@ export default async function DashboardPage() {
                     Hello, <span className="font-semibold">{user.email}</span>!
                   </p>
                   <p className="text-gray-600">
-                    Your account has been successfully created and verified. 
+                    Your account has been successfully created. 
                   </p>
                   <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
                     <h3 className="font-semibold text-blue-900 mb-2">Getting Started</h3>
                     <ul className="text-blue-800 space-y-1">
-                      <li>• Complete your profile setup</li>
                       <li>• Browse available tutors</li>
                       <li>• Book your first session</li>
+                      <li>• Explore our services</li>
                     </ul>
                   </div>
                   <div className="flex space-x-4 mt-6">
@@ -87,10 +99,10 @@ export default async function DashboardPage() {
                       Browse Tutors
                     </a>
                     <a 
-                      href="/profile" 
+                      href="/about" 
                       className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full transition-all hover:scale-105"
                     >
-                      Complete Profile
+                      Learn More
                     </a>
                   </div>
                 </div>
@@ -101,20 +113,52 @@ export default async function DashboardPage() {
       )
     }
 
-    // Render role-specific dashboard if profile exists
+    // Show welcome message if present
+    const welcomeMessage = message && (
+      <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
+        <p className="text-green-800">{message}</p>
+      </div>
+    )
+
+    // Render role-specific dashboard
     switch (profile.user_type) {
       case 'parent':
-        return <ParentDashboard user={user} profile={profile} />
+        return (
+          <div>
+            {welcomeMessage}
+            <ParentDashboard user={user} profile={profile} />
+          </div>
+        )
       case 'teacher':
-        return <TeacherDashboard user={user} profile={profile} />
+        return (
+          <div>
+            {welcomeMessage}
+            <TeacherDashboard user={user} profile={profile} />
+          </div>
+        )
       case 'school':
-        return <SchoolDashboard user={user} profile={profile} />
+        return (
+          <div>
+            {welcomeMessage}
+            <SchoolDashboard user={user} profile={profile} />
+          </div>
+        )
       default:
         if (profile.is_admin) {
           const stats = await getAdminStats(supabase)
-          return <AdminDashboard user={user} profile={profile} stats={stats} />
+          return (
+            <div>
+              {welcomeMessage}
+              <AdminDashboard user={user} profile={profile} stats={stats} />
+            </div>
+          )
         }
-        return <ParentDashboard user={user} profile={profile} />
+        return (
+          <div>
+            {welcomeMessage}
+            <ParentDashboard user={user} profile={profile} />
+          </div>
+        )
     }
   } catch (error) {
     console.error('Dashboard error:', error)

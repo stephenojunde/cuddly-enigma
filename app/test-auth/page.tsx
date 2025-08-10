@@ -20,14 +20,8 @@ export default async function TestAuthPage() {
               <p className="text-sm">
                 Supabase URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Set' : '❌ Missing'}
               </p>
-              <p className="text-sm text-xs text-gray-500">
-                URL: {process.env.NEXT_PUBLIC_SUPABASE_URL}
-              </p>
               <p className="text-sm">
                 Supabase Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Set' : '❌ Missing'}
-              </p>
-              <p className="text-sm text-xs text-gray-500">
-                Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? `${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.substring(0, 20)}...` : 'Not set'}
               </p>
             </div>
             
@@ -44,12 +38,6 @@ export default async function TestAuthPage() {
               <h3 className="font-semibold">Current Session:</h3>
               <p className="text-sm">
                 User: {data?.session?.user?.email || 'Not logged in'}
-              </p>
-              <p className="text-sm">
-                User ID: {data?.session?.user?.id || 'N/A'}
-              </p>
-              <p className="text-sm">
-                Email Confirmed: {data?.session?.user?.email_confirmed_at ? '✅ Yes' : '❌ No'}
               </p>
             </div>
           </div>

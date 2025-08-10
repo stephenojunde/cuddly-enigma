@@ -7,14 +7,14 @@ import { resendConfirmation } from '@/app/auth/actions'
 import Link from 'next/link'
 
 interface ResendConfirmationPageProps {
-  searchParams: Promise<{
+  searchParams: {
     error?: string
     message?: string
-  }>
+  }
 }
 
-export default async function ResendConfirmationPage({ searchParams }: ResendConfirmationPageProps) {
-  const { error, message } = await searchParams
+export default function ResendConfirmationPage({ searchParams }: ResendConfirmationPageProps) {
+  const { error, message } = searchParams
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

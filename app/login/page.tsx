@@ -47,12 +47,7 @@ function LoginForm() {
               <AlertDescription className="text-red-800">
                 {urlError === 'Invalid credentials' ? 'Invalid email or password. Please try again.' : 
                  urlError === 'Login failed' ? 'Login failed. Please try again.' :
-                 urlError === 'Please check your email and confirm your account' ? (
-                   <div>
-                     <p className="mb-2">Please check your email and confirm your account before signing in.</p>
-                     <p className="text-sm">Didn't receive the email? Check your spam folder or <a href="/resend-confirmation" className="text-[#8A2BE1] hover:underline">resend confirmation</a>.</p>
-                   </div>
-                 ) :
+
                  'An error occurred. Please try again.'}
               </AlertDescription>
             </Alert>

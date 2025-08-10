@@ -4,24 +4,25 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Link from 'next/link'
 
 interface SignupPageProps {
-  searchParams: Promise<{
+  searchParams: {
     error?: string
     message?: string
-  }>
+  }
 }
 
-export default async function SignupPage({ searchParams }: SignupPageProps) {
-  const { error, message } = await searchParams
+export default function SignupPage({ searchParams }: SignupPageProps) {
+  const { error, message } = searchParams
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
           <CardDescription className="text-center">
-            Join Tutelage Services to access our platform
+            Join Tutelage Services and start your learning journey
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -44,6 +45,31 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
           )}
 
           <form className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  required
+                  placeholder="Enter your first name"
+                  className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  required
+                  placeholder="Enter your last name"
+                  className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -56,6 +82,24 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="userType">I am a...</Label>
+              <Select name="userType" required>
+                <SelectTrigger className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]">
+                  <SelectValue placeholder="Select your role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="parent">Parent/Student - Looking for tutoring services</SelectItem>
+                  <SelectItem value="teacher">Teacher/Tutor - Offering tutoring services</SelectItem>
+                  <SelectItem value="school">School Administrator - Managing school needs</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500">
+                Choose the role that best describes you. You can update this later.
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -82,16 +126,22 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number (Optional)</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="Enter your phone number"
+                className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
+              />
+            </div>
+
             <Button formAction={signup} className="w-full bg-[#8A2BE1] hover:bg-[#5d1a9a]">
               Create Account
             </Button>
           </form>
-          
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-800">
-              📧 After creating your account, you'll receive a confirmation email. Please check your inbox (and spam folder) and click the confirmation link before signing in.
-            </p>
-          </div>
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/login" className="text-[#8A2BE1] hover:text-[#5d1a9a] font-medium">
