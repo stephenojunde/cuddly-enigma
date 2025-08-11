@@ -6,6 +6,9 @@ export async function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+  console.log('Creating Supabase client with URL:', supabaseUrl ? 'Set' : 'Missing')
+  console.log('Supabase key:', supabaseAnonKey ? 'Set' : 'Missing')
+
   if (!supabaseUrl) {
     throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable')
   }
@@ -17,7 +20,7 @@ export async function createClient() {
   try {
     const cookieStore = await cookies()
 
-    return createServerClient(supabaseUrl, supabaseAnonKey, {
+    const client = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return cookieStore.getAll()
@@ -34,6 +37,9 @@ export async function createClient() {
         },
       },
     })
+
+    console.log('Supabase client created successfully')
+    return client
   } catch (error) {
     console.error('Error creating Supabase server client:', error)
     throw new Error(`Failed to create Supabase server client: ${error instanceof Error ? error.message : 'Unknown error'}`)

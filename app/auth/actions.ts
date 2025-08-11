@@ -5,21 +5,23 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/server'
 
 export async function login(formData: FormData) {
+  const supabase = await createClient()
+
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+
+  console.log('Login attempt for:', email)
+
+  // Basic validation
+  if (!email || !password) {
+    redirect('/login?error=Email and password are required')
+  }
+
+  if (!email.includes('@')) {
+    redirect('/login?error=Please enter a valid email address')
+  }
+
   try {
-    const supabase = await createClient()
-
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-
-    // Basic validation
-    if (!email || !password) {
-      redirect('/login?error=Email and password are required')
-    }
-
-    if (!email.includes('@')) {
-      redirect('/login?error=Please enter a valid email address')
-    }
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -35,57 +37,76 @@ export async function login(formData: FormData) {
     }
 
     if (data.user) {
+      console.log('Login successful for user:', data.user.email)
       revalidatePath('/', 'layout')
       redirect('/dashboard')
+    } else {
+      console.log('Login failed: No user data returned')
+      redirect('/login?error=Login failed')
     }
   } catch (error) {
-    console.error('Login error:', error)
+    console.error('Login exception:', error)
+    
+    // Check if this is a redirect error (which is expected)
+    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+      throw error // Re-throw redirect errors
+    }
+    
     redirect('/login?error=Login failed')
   }
 }
 
 export async function signup(formData: FormData) {
+  const supabase = await createClient()
+
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const confirmPassword = formData.get('confirmPassword') as string
+  const firstName = formData.get('firstName') as string
+  const lastName = formData.get('lastName') as string
+  const userType = formData.get('userType') as string
+  const phone = formData.get('phone') as string
+
+  console.log('Signup attempt for:', email, 'with role:', userType)
+  console.log('Form data received:', { firstName, lastName, userType, phone: phone || 'none' })
+
+  // Basic validation
+  if (!email || !password || !confirmPassword || !firstName || !lastName || !userType) {
+    console.log('Validation failed: Missing required fields')
+    console.log('Missing fields:', {
+      email: !email,
+      password: !password,
+      confirmPassword: !confirmPassword,
+      firstName: !firstName,
+      lastName: !lastName,
+      userType: !userType
+    })
+    redirect('/signup?error=All required fields must be filled')
+  }
+
+  if (!email.includes('@')) {
+    console.log('Validation failed: Invalid email format')
+    redirect('/signup?error=Please enter a valid email address')
+  }
+
+  if (password.length < 6) {
+    console.log('Validation failed: Password too short')
+    redirect('/signup?error=Password must be at least 6 characters long')
+  }
+
+  if (password !== confirmPassword) {
+    console.log('Validation failed: Passwords do not match')
+    redirect('/signup?error=Passwords do not match')
+  }
+
+  if (!['parent', 'teacher', 'school'].includes(userType)) {
+    console.log('Validation failed: Invalid user type:', userType)
+    redirect('/signup?error=Please select a valid user type')
+  }
+
+  console.log('Validation passed, creating user account...')
+
   try {
-    const supabase = await createClient()
-
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-    const confirmPassword = formData.get('confirmPassword') as string
-    const firstName = formData.get('firstName') as string
-    const lastName = formData.get('lastName') as string
-    const userType = formData.get('userType') as string
-    const phone = formData.get('phone') as string
-
-    console.log('Signup attempt for:', email, 'with role:', userType)
-
-    // Basic validation
-    if (!email || !password || !confirmPassword || !firstName || !lastName || !userType) {
-      console.log('Validation failed: Missing required fields')
-      redirect('/signup?error=All required fields must be filled')
-    }
-
-    if (!email.includes('@')) {
-      console.log('Validation failed: Invalid email format')
-      redirect('/signup?error=Please enter a valid email address')
-    }
-
-    if (password.length < 6) {
-      console.log('Validation failed: Password too short')
-      redirect('/signup?error=Password must be at least 6 characters long')
-    }
-
-    if (password !== confirmPassword) {
-      console.log('Validation failed: Passwords do not match')
-      redirect('/signup?error=Passwords do not match')
-    }
-
-    if (!['parent', 'teacher', 'school'].includes(userType)) {
-      console.log('Validation failed: Invalid user type:', userType)
-      redirect('/signup?error=Please select a valid user type')
-    }
-
-    console.log('Validation passed, creating user account...')
-
     // Create the user account
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -165,6 +186,12 @@ export async function signup(formData: FormData) {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : 'No stack trace'
     })
+    
+    // Check if this is a redirect error (which is expected)
+    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+      throw error // Re-throw redirect errors
+    }
+    
     redirect('/signup?error=An unexpected error occurred during signup')
   }
 }
