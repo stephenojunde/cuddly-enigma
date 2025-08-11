@@ -15,7 +15,7 @@ export default function HomePage() {
       rating: 4.9,
       reviews: 127,
       hourly_rate: 35,
-      avatar_url: '/placeholder.svg?height=80&width=80'
+      avatar_url: '/images/placeholder-avatar.svg'
     },
     {
       id: '2', 
@@ -24,7 +24,7 @@ export default function HomePage() {
       rating: 4.8,
       reviews: 89,
       hourly_rate: 30,
-      avatar_url: '/placeholder.svg?height=80&width=80'
+      avatar_url: '/images/placeholder-avatar.svg'
     },
     {
       id: '3',
@@ -33,7 +33,7 @@ export default function HomePage() {
       rating: 4.9,
       reviews: 156,
       hourly_rate: 40,
-      avatar_url: '/placeholder.svg?height=80&width=80'
+      avatar_url: '/images/placeholder-avatar.svg'
     }
   ]
 
@@ -137,11 +137,15 @@ export default function HomePage() {
                 <CardContent className="p-6 text-center">
                   <div className="relative mb-4">
                     <Image
-                      src={tutor.avatar_url || "/placeholder.svg"}
+                      src={tutor.avatar_url || "/images/placeholder-avatar.svg"}
                       alt={`${tutor.name} profile`}
                       width={80}
                       height={80}
                       className="rounded-full mx-auto transition-all duration-300 group-hover:scale-110"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/images/placeholder-avatar.svg';
+                      }}
                     />
                     <div className="absolute inset-0 rounded-full bg-[#8A2BE1] opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                   </div>
