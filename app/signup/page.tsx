@@ -130,6 +130,9 @@ export default function SignupPage() {
                 name="userType"
                 required
                 disabled={isLoading}
+                aria-label="Select your role"
+                aria-describedby="userType-description"
+                title="Select your role to continue with registration"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
               >
                 <option value="">Select your role</option>
@@ -137,7 +140,7 @@ export default function SignupPage() {
                 <option value="teacher">Teacher/Tutor - Offering tutoring services</option>
                 <option value="school">School Administrator - Managing school needs</option>
               </select>
-              <p className="text-sm text-gray-500">
+              <p id="userType-description" className="text-sm text-gray-500">
                 Choose the role that best describes you. You can update this later.
               </p>
             </div>
