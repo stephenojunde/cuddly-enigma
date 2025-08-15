@@ -68,6 +68,7 @@ A comprehensive Next.js-based platform for educational recruitment and tutoring 
      scripts/006_dashboard_tables.sql
      scripts/007_additional_tables.sql
      scripts/008_admin_features.sql
+     scripts/009_fix_profiles_table.sql  -- Important: Run this to fix signup issues
      ```
 
 5. **Run the development server**

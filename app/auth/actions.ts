@@ -126,6 +126,8 @@ export async function signup(formData: FormData) {
   }
 
   try {
+    console.log('Starting signup process for:', email)
+    
     // Create the user account
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -141,7 +143,7 @@ export async function signup(formData: FormData) {
     })
 
     if (error) {
-      console.error('Signup error:', error.message)
+      console.error('Supabase auth signup error:', error.message)
       
       if (error.message.includes('User already registered')) {
         redirect('/signup?error=An account with this email already exists')
@@ -157,14 +159,54 @@ export async function signup(formData: FormData) {
     }
 
     if (data.user) {
+      console.log('User created successfully:', data.user.id)
+      
+      // Try to create profile manually if it doesn't exist
+      try {
+        // First check if profiles table exists
+        const { data: tableCheck } = await supabase
+          .from('profiles')
+          .select('id')
+          .limit(1)
+
+        // If we can query the table, try to insert the profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            email: email,
+            first_name: firstName,
+            last_name: lastName,
+            user_type: userType,
+            phone: phone || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          // Don't fail signup if profile creation fails - user can still login
+          // The profile will be created on first login via ensureUserProfile
+        } else {
+          console.log('Profile created successfully')
+        }
+      } catch (profileException) {
+        console.error('Profile creation exception (table may not exist):', profileException)
+        // Continue with signup even if profile creation fails
+        // This allows signup to work even if database setup is incomplete
+      }
+      
       // Check if email confirmation is required
       if (!data.session) {
+        console.log('Email confirmation required')
         redirect('/login?message=Please check your email and click the confirmation link to activate your account')
       }
       
+      console.log('Signup completed successfully')
       revalidatePath('/', 'layout')
       redirect('/dashboard?message=Welcome to Tutelage Services! Your account has been created successfully.')
     } else {
+      console.error('No user data returned from signup')
       redirect('/signup?error=Account creation failed. Please try again')
     }
   } catch (error) {
