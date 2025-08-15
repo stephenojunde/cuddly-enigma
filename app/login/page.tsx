@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { login } from '@/app/auth/actions'
 
 function LoginForm() {
@@ -45,10 +46,12 @@ function LoginForm() {
           {urlError && (
             <Alert className="mb-4 border-red-200 bg-red-50">
               <AlertDescription className="text-red-800">
-                {urlError === 'Invalid credentials' ? 'Invalid email or password. Please try again.' : 
-                 urlError === 'Login failed' ? 'Login failed. Please try again.' :
-
-                 'An error occurred. Please try again.'}
+                {urlError === 'Invalid email or password' ? 'Invalid email or password. Please check your credentials and try again.' : 
+                 urlError === 'Please check your email and confirm your account' ? 'Please check your email and click the confirmation link to activate your account.' :
+                 urlError === 'Too many login attempts. Please try again later' ? 'Too many login attempts. Please wait a few minutes before trying again.' :
+                 urlError === 'Email and password are required' ? 'Please enter both email and password.' :
+                 urlError === 'Please enter a valid email address' ? 'Please enter a valid email address.' :
+                 urlError}
               </AlertDescription>
             </Alert>
           )}
@@ -98,10 +101,17 @@ function LoginForm() {
 
             <Button 
               type="submit" 
-              className="w-full bg-[#8A2BE1] hover:bg-[#5d1a9a]" 
+              className="w-full bg-[#8A2BE1] hover:bg-[#5d1a9a] disabled:opacity-50" 
               disabled={isLoading}
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <LoadingSpinner size="sm" className="mr-2" />
+                  Signing in...
+                </div>
+              ) : (
+                'Sign In'
+              )}
             </Button>
           </form>
 

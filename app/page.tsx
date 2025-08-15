@@ -137,15 +137,11 @@ export default function HomePage() {
                 <CardContent className="p-6 text-center">
                   <div className="relative mb-4">
                     <Image
-                      src={tutor.avatar_url || "/images/placeholder-avatar.svg"}
+                      src={tutor.avatar_url || "/placeholder.svg"}
                       alt={`${tutor.name} profile`}
                       width={80}
                       height={80}
                       className="rounded-full mx-auto transition-all duration-300 group-hover:scale-110"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/images/placeholder-avatar.svg';
-                      }}
                     />
                     <div className="absolute inset-0 rounded-full bg-[#8A2BE1] opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                   </div>

@@ -1,21 +1,60 @@
+'use client'
+
+import { useState } from 'react'
 import { signup } from '../auth/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
-interface SignupPageProps {
-  searchParams: Promise<{
-    error?: string
-    message?: string
-  }>
-}
+export default function SignupPage() {
+  const [isLoading, setIsLoading] = useState(false)
+  const [clientError, setClientError] = useState('')
+  const searchParams = useSearchParams()
+  
+  const error = searchParams.get('error')
+  const message = searchParams.get('message')
 
-export default async function SignupPage({ searchParams }: SignupPageProps) {
-  const { error, message } = await searchParams
+  const handleSubmit = async (formData: FormData) => {
+    setIsLoading(true)
+    setClientError('')
+
+    // Client-side validation
+    const password = formData.get('password') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+    const email = formData.get('email') as string
+
+    if (!email.includes('@')) {
+      setClientError('Please enter a valid email address')
+      setIsLoading(false)
+      return
+    }
+
+    if (password.length < 6) {
+      setClientError('Password must be at least 6 characters long')
+      setIsLoading(false)
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setClientError('Passwords do not match')
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      await signup(formData)
+    } catch (err) {
+      console.error('Signup error:', err)
+      setClientError('An unexpected error occurred. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
@@ -26,10 +65,10 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
+          {(error || clientError) && (
             <Alert className="mb-4 border-red-200 bg-red-50">
               <AlertDescription className="text-red-800">
-                {error}
+                {clientError || error}
               </AlertDescription>
             </Alert>
           )}
@@ -42,7 +81,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
             </Alert>
           )}
 
-          <form className="space-y-4">
+          <form action={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
@@ -51,6 +90,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                   name="firstName"
                   type="text"
                   required
+                  disabled={isLoading}
                   placeholder="Enter your first name"
                   className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
                 />
@@ -62,6 +102,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                   name="lastName"
                   type="text"
                   required
+                  disabled={isLoading}
                   placeholder="Enter your last name"
                   className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
                 />
@@ -76,6 +117,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 type="email"
                 autoComplete="email"
                 required
+                disabled={isLoading}
                 placeholder="Enter your email"
                 className="focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
               />
@@ -87,6 +129,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 id="userType"
                 name="userType"
                 required
+                disabled={isLoading}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-[#8A2BE1] focus:border-[#8A2BE1]"
               >
                 <option value="">Select your role</option>
@@ -137,8 +180,19 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
               />
             </div>
 
-            <Button formAction={signup} className="w-full bg-[#8A2BE1] hover:bg-[#5d1a9a]">
-              Create Account
+            <Button 
+              type="submit" 
+              className="w-full bg-[#8A2BE1] hover:bg-[#5d1a9a] disabled:opacity-50" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <LoadingSpinner size="sm" className="mr-2" />
+                  Creating Account...
+                </div>
+              ) : (
+                'Create Account'
+              )}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
