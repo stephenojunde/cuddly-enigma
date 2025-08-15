@@ -19,19 +19,7 @@ function LoginForm() {
   const urlError = searchParams.get('error')
   const message = searchParams.get('message')
 
-  const handleSubmit = async (formData: FormData) => {
-    setIsLoading(true)
-    setError('')
 
-    try {
-      await login(formData)
-    } catch (err) {
-      console.error('Login error:', err)
-      setError('Login failed. Please try again.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -72,7 +60,7 @@ function LoginForm() {
             </Alert>
           )}
 
-          <form action={handleSubmit} className="space-y-4">
+          <form action={login} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

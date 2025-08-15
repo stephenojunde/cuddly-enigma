@@ -127,23 +127,18 @@ export async function signup(formData: FormData) {
 
   try {
     console.log('Starting signup process for:', email)
+    console.log('User type:', userType)
+    console.log('Phone:', phone)
     
-    // Create the user account
+    // Try a minimal signup first without metadata
     const { data, error } = await supabase.auth.signUp({
       email,
-      password,
-      options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          user_type: userType,
-          phone: phone || null
-        }
-      }
+      password
     })
 
     if (error) {
       console.error('Supabase auth signup error:', error.message)
+      console.error('Full error object:', JSON.stringify(error, null, 2))
       
       if (error.message.includes('User already registered')) {
         redirect('/signup?error=An account with this email already exists')
@@ -153,23 +148,19 @@ export async function signup(formData: FormData) {
         redirect('/signup?error=Please enter a valid email address')
       } else if (error.message.includes('Signup is disabled')) {
         redirect('/signup?error=Account registration is currently disabled')
+      } else if (error.message.includes('Database error')) {
+        console.error('Database error details:', error)
+        redirect('/signup?error=Database configuration issue. Please contact support.')
       } else {
-        redirect('/signup?error=Account creation failed. Please try again')
+        redirect(`/signup?error=${encodeURIComponent(error.message)}`)
       }
     }
 
     if (data.user) {
       console.log('User created successfully:', data.user.id)
       
-      // Try to create profile manually if it doesn't exist
+      // Now try to create the profile manually
       try {
-        // First check if profiles table exists
-        const { data: tableCheck } = await supabase
-          .from('profiles')
-          .select('id')
-          .limit(1)
-
-        // If we can query the table, try to insert the profile
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
@@ -178,22 +169,17 @@ export async function signup(formData: FormData) {
             first_name: firstName,
             last_name: lastName,
             user_type: userType,
-            phone: phone || null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            phone: phone || null
           })
 
         if (profileError) {
           console.error('Profile creation error:', profileError)
-          // Don't fail signup if profile creation fails - user can still login
-          // The profile will be created on first login via ensureUserProfile
+          console.error('Profile error details:', JSON.stringify(profileError, null, 2))
         } else {
           console.log('Profile created successfully')
         }
       } catch (profileException) {
-        console.error('Profile creation exception (table may not exist):', profileException)
-        // Continue with signup even if profile creation fails
-        // This allows signup to work even if database setup is incomplete
+        console.error('Profile creation exception:', profileException)
       }
       
       // Check if email confirmation is required
@@ -216,6 +202,7 @@ export async function signup(formData: FormData) {
     }
     
     console.error('Signup exception:', error)
+    console.error('Exception details:', JSON.stringify(error, null, 2))
     redirect('/signup?error=An unexpected error occurred. Please try again')
   }
 }
