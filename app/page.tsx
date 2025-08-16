@@ -82,6 +82,9 @@ export default function HomePage() {
                 <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-[#8A2BE1] hover:scale-105 transition-all duration-300">
                   <Link href="/apply/tutor">Become a Tutor</Link>
                 </Button>
+                <Button asChild size="lg" className="bg-green-600 text-white hover:bg-green-700 hover:scale-105 transition-all duration-300">
+                  <Link href="/dashboard" target="_blank" rel="noopener noreferrer">Dashboard ↗</Link>
+                </Button>
               </div>
             </div>
             <div className="lg:w-1/2 animate-fade-in-right animate-float">
