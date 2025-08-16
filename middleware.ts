@@ -39,10 +39,16 @@ export async function middleware(request: NextRequest) {
     if (request.nextUrl.pathname.startsWith('/dashboard')) {
       const { data: { user }, error } = await supabase.auth.getUser()
       
+      console.log('Middleware checking dashboard access for:', user?.email || 'no user')
+      
       if (error || !user) {
+        console.log('Middleware: No user found, redirecting to login')
         const url = request.nextUrl.clone()
         url.pathname = '/login'
+        url.searchParams.set('error', 'Please log in to access your dashboard')
         return NextResponse.redirect(url)
+      } else {
+        console.log('Middleware: User authenticated, allowing dashboard access')
       }
     }
 

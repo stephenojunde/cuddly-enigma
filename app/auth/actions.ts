@@ -41,12 +41,16 @@ export async function login(formData: FormData) {
     }
 
     if (data.user) {
+      console.log('Login successful for user:', data.user.email)
+      
       // Ensure user profile exists
       await ensureUserProfile(supabase, data.user)
       
+      console.log('About to redirect to login success page...')
       revalidatePath('/', 'layout')
-      redirect('/dashboard')
+      redirect('/login-success')
     } else {
+      console.log('No user data returned from login')
       redirect('/login?error=Login failed. Please try again')
     }
   } catch (error) {

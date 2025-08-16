@@ -195,31 +195,31 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <div className="space-y-3">
                   {profile.user_type === 'parent' && (
                     <>
-                      <Link href="/tutors" className="block w-full bg-[#8A2BE1] hover:bg-[#5d1a9a] text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
-                        Find a Tutor
+                      <Link href="/tutors" target="_blank" rel="noopener noreferrer" className="block w-full bg-[#8A2BE1] hover:bg-[#5d1a9a] text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
+                        Find a Tutor ↗
                       </Link>
-                      <Link href="/dashboard/bookings" className="block w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
-                        View Bookings
+                      <Link href="/dashboard/bookings" target="_blank" rel="noopener noreferrer" className="block w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
+                        View Bookings ↗
                       </Link>
                     </>
                   )}
                   {profile.user_type === 'teacher' && (
                     <>
-                      <Link href="/apply/tutor" className="block w-full bg-[#8A2BE1] hover:bg-[#5d1a9a] text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
-                        Update Profile
+                      <Link href="/apply/tutor" target="_blank" rel="noopener noreferrer" className="block w-full bg-[#8A2BE1] hover:bg-[#5d1a9a] text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
+                        Update Profile ↗
                       </Link>
-                      <Link href="/dashboard/bookings" className="block w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
-                        My Sessions
+                      <Link href="/dashboard/bookings" target="_blank" rel="noopener noreferrer" className="block w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
+                        My Sessions ↗
                       </Link>
                     </>
                   )}
                   {profile.user_type === 'school' && (
                     <>
-                      <Link href="/jobs" className="block w-full bg-[#8A2BE1] hover:bg-[#5d1a9a] text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
-                        Post a Job
+                      <Link href="/jobs" target="_blank" rel="noopener noreferrer" className="block w-full bg-[#8A2BE1] hover:bg-[#5d1a9a] text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
+                        Post a Job ↗
                       </Link>
-                      <Link href="/schools" className="block w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
-                        Our Services
+                      <Link href="/schools" target="_blank" rel="noopener noreferrer" className="block w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full text-center transition-all hover:scale-105">
+                        Our Services ↗
                       </Link>
                     </>
                   )}
@@ -254,21 +254,21 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <div className="mt-8 bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Explore Tutelage Services</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Link href="/about" className="text-center p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                <Link href="/about" target="_blank" rel="noopener noreferrer" className="text-center p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                   <BookOpen className="h-8 w-8 text-[#8A2BE1] mx-auto mb-2" />
-                  <p className="font-medium">About Us</p>
+                  <p className="font-medium">About Us ↗</p>
                 </Link>
-                <Link href="/contact" className="text-center p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                <Link href="/contact" target="_blank" rel="noopener noreferrer" className="text-center p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                   <MessageSquare className="h-8 w-8 text-[#8A2BE1] mx-auto mb-2" />
-                  <p className="font-medium">Contact</p>
+                  <p className="font-medium">Contact ↗</p>
                 </Link>
-                <Link href="/testimonials" className="text-center p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                <Link href="/testimonials" target="_blank" rel="noopener noreferrer" className="text-center p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                   <Star className="h-8 w-8 text-[#8A2BE1] mx-auto mb-2" />
-                  <p className="font-medium">Testimonials</p>
+                  <p className="font-medium">Testimonials ↗</p>
                 </Link>
-                <Link href="/why-us" className="text-center p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                <Link href="/why-us" target="_blank" rel="noopener noreferrer" className="text-center p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                   <TrendingUp className="h-8 w-8 text-[#8A2BE1] mx-auto mb-2" />
-                  <p className="font-medium">Why Choose Us</p>
+                  <p className="font-medium">Why Choose Us ↗</p>
                 </Link>
               </div>
             </div>
