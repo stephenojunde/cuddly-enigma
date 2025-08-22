@@ -189,7 +189,7 @@ export default function HomePage() {
               Why Choose Tutelage?
             </h2>
             <p className="text-lg text-gray-600">
-              We're committed to providing the best tutoring experience for students and families.
+              We&apos;re committed to providing the best tutoring experience for students and families.
             </p>
           </div>
           
