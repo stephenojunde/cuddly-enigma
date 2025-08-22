@@ -63,9 +63,6 @@ export function Header() {
             <Link href="/signup" className="bg-[#8A2BE1] hover:bg-[#5d1a9a] text-white font-bold py-2 px-4 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg animate-pulse-glow mr-2">
               Sign Up
             </Link>
-            <Link href="/dashboard" target="_blank" rel="noopener noreferrer" className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full transition-all duration-300 hover:scale-105">
-              Dashboard ↗
-            </Link>
           </div>
           
           <div className="md:hidden">
@@ -95,11 +92,6 @@ export function Header() {
             <li className="animate-scale-in stagger-1">
               <Link href="/signup" className="block w-full text-center py-2 px-4 text-white bg-transparent border border-white rounded-full hover:bg-white hover:text-[#330a59] transition-all duration-300 hover:scale-105">
                 Sign Up
-              </Link>
-            </li>
-            <li className="animate-scale-in stagger-2">
-              <Link href="/dashboard" target="_blank" rel="noopener noreferrer" className="block w-full text-center py-2 px-4 text-white bg-green-600 rounded-full hover:bg-green-700 transition-all duration-300 hover:scale-105">
-                Dashboard ↗
               </Link>
             </li>
           </ul>
