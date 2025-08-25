@@ -1,7 +1,7 @@
-'use client'
+"use client"
 
 import { useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,8 +11,8 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { login } from '@/app/auth/actions'
 
 function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [isLoading] = useState(false)
+  const [error] = useState('')
   const searchParams = useSearchParams()
   
   // Check for URL parameters

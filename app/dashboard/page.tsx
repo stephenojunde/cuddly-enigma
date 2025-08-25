@@ -37,15 +37,15 @@ async function getAdminStats(supabase: any) {
 }
 
 interface DashboardPageProps {
-  searchParams: {
+  searchParams: Promise<{
     message?: string
-  }
+  }>
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   try {
     console.log('Dashboard page accessed')
-    const { message } = searchParams || {}
+  const { message } = await searchParams
     const supabase = await createClient()
 
     console.log('Getting user authentication...')

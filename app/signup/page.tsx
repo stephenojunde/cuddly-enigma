@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { signup } from '../auth/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,11 +11,11 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
-export default function SignupPage() {
+function SignupForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [clientError, setClientError] = useState('')
   const searchParams = useSearchParams()
-  
+
   const error = searchParams.get('error')
   const message = searchParams.get('message')
 
@@ -55,6 +55,7 @@ export default function SignupPage() {
       setIsLoading(false)
     }
   }
+
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
@@ -72,7 +73,7 @@ export default function SignupPage() {
               </AlertDescription>
             </Alert>
           )}
-          
+
           {message && (
             <Alert className="mb-4 border-green-200 bg-green-50">
               <AlertDescription className="text-green-800">
@@ -207,5 +208,13 @@ export default function SignupPage() {
         </CardContent>
       </Card>
     </main>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <SignupForm />
+    </Suspense>
   )
 }

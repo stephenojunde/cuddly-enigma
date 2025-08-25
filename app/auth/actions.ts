@@ -1,8 +1,9 @@
-'use server'
+"use server"
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/server'
+import type { User } from '@supabase/supabase-js'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -47,8 +48,9 @@ export async function login(formData: FormData) {
       await ensureUserProfile(supabase, data.user)
       
       console.log('About to redirect to login success page...')
-      revalidatePath('/', 'layout')
-      redirect('/login-success')
+    revalidatePath('/', 'layout')
+    // Go straight to dashboard after successful login
+    return redirect('/dashboard')
     } else {
       console.log('No user data returned from login')
       redirect('/login?error=Login failed. Please try again')
@@ -65,7 +67,8 @@ export async function login(formData: FormData) {
 }
 
 // Helper function to ensure user profile exists
-async function ensureUserProfile(supabase: any, user: any) {
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>
+async function ensureUserProfile(supabase: SupabaseServerClient, user: User) {
   try {
     const { data: existingProfile } = await supabase
       .from('profiles')
