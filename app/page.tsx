@@ -143,7 +143,6 @@ export default function HomePage() {
                       height={80}
                       className="rounded-full mx-auto transition-all duration-300 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 rounded-full bg-[#8A2BE1] opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                   </div>
                   <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-[#8A2BE1] transition-colors duration-300">{tutor.name}</h3>
                   <div className="flex flex-wrap justify-center gap-2 mb-3">
