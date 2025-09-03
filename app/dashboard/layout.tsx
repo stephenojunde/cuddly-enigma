@@ -45,7 +45,7 @@ export default async function DashboardLayout({
     <div className="flex h-screen bg-gray-100">
       <DashboardSidebar user={user} profile={safeProfile} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardHeader user={user} profile={safeProfile} />
+  <DashboardHeader user={user} profile={safeProfile} currentDate={new Date().toUTCString()} />
         <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>

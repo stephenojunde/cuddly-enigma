@@ -24,9 +24,23 @@ interface Profile {
 interface DashboardHeaderProps {
   user: User
   profile: Profile
+  currentDate?: string
 }
 
-export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
+function formatDateDeterministic(d: Date) {
+  const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+  const wd = weekdays[d.getDay()]
+  const day = d.getDate()
+  const month = months[d.getMonth()]
+  const year = d.getFullYear()
+  return `${wd}, ${day} ${month} ${year}`
+}
+
+export function DashboardHeader({ user, profile, currentDate }: DashboardHeaderProps) {
   return (
     <header className="bg-white shadow-sm border-b px-6 py-4">
       <div className="flex items-center justify-between">
@@ -35,12 +49,7 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
             Welcome back, {profile?.full_name || user?.email?.split('@')[0] || 'User'}!
           </h2>
           <p className="text-gray-600">
-            {new Date().toLocaleDateString('en-GB', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
+            {currentDate ?? formatDateDeterministic(new Date())}
           </p>
         </div>
         
