@@ -32,3 +32,5 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
     </div>
   )
 }
+
+export default ConditionalLayout
