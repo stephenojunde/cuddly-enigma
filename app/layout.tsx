@@ -1,7 +1,6 @@
 import { Poppins, Playfair_Display } from 'next/font/google'
 import './globals.css'
-import { Header } from '@/components/header'
-import { Footer } from '@/components/footer'
+import { ConditionalLayout } from '@/components/conditional-layout'
 
 const poppins = Poppins({ 
   subsets: ['latin'],
@@ -27,10 +26,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${poppins.variable} ${playfair.variable}`}>
-      <body className="font-poppins bg-white pt-14 antialiased">
-        <Header />
-        {children}
-        <Footer />
+      <body className="font-poppins bg-white antialiased">
+        <ConditionalLayout>
+          {children}
+        </ConditionalLayout>
       </body>
     </html>
   )

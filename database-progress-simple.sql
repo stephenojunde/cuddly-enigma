@@ -1,4 +1,4 @@
--- Additional Dashboard Tables - Step 2
+-- Simple Progress Setup - No Triggers Version
 -- Run this after database-minimal-setup.sql completed successfully
 
 -- 1. Create student_progress table
@@ -152,66 +152,19 @@ CREATE POLICY "Tutors can create progress entries" ON progress_entries
         AND created_by = auth.uid()
     );
 
--- 10. Create the update_updated_at_column function if it doesn't exist
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- 11. Add triggers for updated_at
-CREATE TRIGGER update_student_progress_updated_at 
-    BEFORE UPDATE ON student_progress 
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_teacher_students_updated_at 
-    BEFORE UPDATE ON teacher_students 
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_sessions_updated_at 
-    BEFORE UPDATE ON sessions 
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- 12. Insert some sample data
+-- 10. Verify tables were created successfully
 DO $$
-DECLARE
-    sample_child_id UUID;
-    sample_tutor_id UUID;
-    sample_ts_id UUID;
-    sample_progress_id UUID;
 BEGIN
-    -- Get a sample child and tutor if they exist
-    SELECT id INTO sample_child_id FROM children LIMIT 1;
-    SELECT id INTO sample_tutor_id FROM tutors LIMIT 1;
-    
-    IF sample_child_id IS NOT NULL AND sample_tutor_id IS NOT NULL THEN
-        -- Create teacher-student relationship
-        INSERT INTO teacher_students (tutor_id, student_id, subject, hourly_rate)
-        VALUES (sample_tutor_id, sample_child_id, 'Mathematics', 25.00)
-        ON CONFLICT DO NOTHING
-        RETURNING id INTO sample_ts_id;
+    -- Check if all tables exist
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'student_progress') AND
+       EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'teacher_students') AND
+       EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'sessions') AND
+       EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'progress_entries') THEN
         
-        -- Create student progress record
-        INSERT INTO student_progress (student_id, tutor_id, subject, current_grade, target_grade, progress_percentage)
-        VALUES (sample_child_id, sample_tutor_id, 'Mathematics', 'Grade 4', 'Grade 6', 65)
-        ON CONFLICT DO NOTHING
-        RETURNING id INTO sample_progress_id;
+        RAISE NOTICE 'All progress tracking tables created successfully!';
         
-        -- Create sample session
-        IF sample_ts_id IS NOT NULL THEN
-            INSERT INTO sessions (teacher_student_id, date, start_time, end_time, duration_minutes, topic, status)
-            VALUES (sample_ts_id, CURRENT_DATE, '14:00', '15:00', 60, 'Fractions and Decimals', 'completed')
-            ON CONFLICT DO NOTHING;
-        END IF;
-        
-        -- Create sample progress entry
-        IF sample_progress_id IS NOT NULL THEN
-            INSERT INTO progress_entries (student_progress_id, entry_type, description, score, max_score)
-            VALUES (sample_progress_id, 'assessment', 'Fraction Assessment', 8.5, 10.0)
-            ON CONFLICT DO NOTHING;
-        END IF;
+    ELSE
+        RAISE NOTICE 'Some tables may not have been created properly. Please check the output above.';
     END IF;
 END$$;
 
