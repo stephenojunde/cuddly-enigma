@@ -71,34 +71,30 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
     if (!profile) {
       return (
-        <div className="min-h-screen bg-gray-50 py-12">
-          <div className="container mx-auto px-6">
-            <div className="max-w-4xl mx-auto">
-              {message && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
-                  <p className="text-green-800">{message}</p>
-                </div>
-              )}
-              <div className="bg-white rounded-lg shadow-md p-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-6">Welcome to Your Dashboard</h1>
-                <div className="space-y-4">
-                  <p className="text-lg text-gray-700">
-                    Hello, <span className="font-semibold">{user.email}</span>!
-                  </p>
-                  <p className="text-gray-600">Your account has been successfully created. We&apos;re setting up your profile.</p>
-                  <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                    <h3 className="font-semibold text-blue-900 mb-2">Getting Started</h3>
-                    <ul className="text-blue-800 space-y-1">
-                      <li>• Browse available tutors</li>
-                      <li>• Book your first session</li>
-                      <li>• Explore our services</li>
-                    </ul>
-                  </div>
-                  <div className="flex space-x-4 mt-6">
-                    <Link href="/tutors" className="bg-[#8A2BE1] hover:bg-[#5d1a9a] text-white font-bold py-2 px-4 rounded-full transition-all hover:scale-105">Browse Tutors</Link>
-                    <Link href="/about" className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full transition-all hover:scale-105">Learn More</Link>
-                  </div>
-                </div>
+        <div className="space-y-6">
+          {message && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-green-800">{message}</p>
+            </div>
+          )}
+          <div className="bg-white rounded-lg shadow-md p-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">Welcome to Your Dashboard</h1>
+            <div className="space-y-4">
+              <p className="text-lg text-gray-700">
+                Hello, <span className="font-semibold">{user.email}</span>!
+              </p>
+              <p className="text-gray-600">Your account has been successfully created. We&apos;re setting up your profile.</p>
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                <h3 className="font-semibold text-blue-900 mb-2">Getting Started</h3>
+                <ul className="text-blue-800 space-y-1">
+                  <li>• Browse available tutors</li>
+                  <li>• Book your first session</li>
+                  <li>• Explore our services</li>
+                </ul>
+              </div>
+              <div className="flex space-x-4 mt-6">
+                <Link href="/tutors" className="bg-[#8A2BE1] hover:bg-[#5d1a9a] text-white font-bold py-2 px-4 rounded-full transition-all hover:scale-105">Browse Tutors</Link>
+                <Link href="/about" className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full transition-all hover:scale-105">Learn More</Link>
               </div>
             </div>
           </div>

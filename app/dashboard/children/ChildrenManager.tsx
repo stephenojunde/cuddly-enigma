@@ -54,6 +54,7 @@ const ACADEMIC_LEVELS = [
   'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'A*', 'A', 'B', 'C', 'D', 'E'
 ]
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function ChildrenManager({ user, profile, initialChildren }: { user: User; profile: Profile | null; initialChildren: Child[] }) {
   const [children, setChildren] = useState<Child[]>(initialChildren)
   const [isLoading, setIsLoading] = useState(false)

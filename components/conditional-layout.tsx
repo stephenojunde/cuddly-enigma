@@ -18,8 +18,8 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
                             pathname?.startsWith('/signup') ||
                             pathname?.startsWith('/auth/')
   
-  if (isDashboardRoute) {
-    // Dashboard pages: no header/footer, no padding
+  if (isCleanLayoutRoute) {
+    // Dashboard and auth pages: no header/footer, no padding
     return <>{children}</>
   }
   

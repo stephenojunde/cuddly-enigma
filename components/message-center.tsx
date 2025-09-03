@@ -90,7 +90,7 @@ export function MessageCenter({ currentUserId, messages: initialMessages, contac
       setMessages([data, ...messages])
       setNewMessage('')
       setSubject('')
-      
+
       toast({
         title: "Message sent!",
         description: `Your message has been sent to ${safeString(selectedContact.full_name)}`,
@@ -112,7 +112,7 @@ export function MessageCenter({ currentUserId, messages: initialMessages, contac
         .eq('id', messageId)
         .eq('recipient_id', currentUserId)
 
-      setMessages(messages.map(msg => 
+      setMessages(messages.map(msg =>
         msg.id === messageId ? { ...msg, is_read: true } : msg
       ))
     } catch (error) {
@@ -146,16 +146,15 @@ export function MessageCenter({ currentUserId, messages: initialMessages, contac
             {filteredContacts.map((contact) => {
               const conversation = conversations[contact.id] || []
               const lastMessage = conversation[0]
-              const unreadCount = conversation.filter(msg => 
+              const unreadCount = conversation.filter(msg =>
                 !msg.is_read && msg.recipient_id === currentUserId
               ).length
 
               return (
                 <div
                   key={contact.id}
-                  className={`p-3 cursor-pointer hover:bg-gray-50 border-b ${
-                    selectedContact?.id === contact.id ? 'bg-blue-50' : ''
-                  }`}
+                  className={`p-3 cursor-pointer hover:bg-gray-50 border-b ${selectedContact?.id === contact.id ? 'bg-blue-50' : ''
+                    }`}
                   onClick={() => {
                     setSelectedContact(contact)
                     setIsComposing(false)
@@ -235,19 +234,17 @@ export function MessageCenter({ currentUserId, messages: initialMessages, contac
                         className={`flex ${isFromCurrentUser ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                            isFromCurrentUser
-                              ? 'bg-[#8A2BE1] text-white'
-                              : 'bg-gray-100 text-gray-900'
-                          }`}
+                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isFromCurrentUser
+                            ? 'bg-[#8A2BE1] text-white'
+                            : 'bg-gray-100 text-gray-900'
+                            }`}
                         >
                           {message.subject && (
                             <p className="font-semibold text-sm mb-1">{message.subject}</p>
                           )}
                           <p className="text-sm">{message.content}</p>
-                          <p className={`text-xs mt-1 ${
-                            isFromCurrentUser ? 'text-purple-200' : 'text-gray-500'
-                          }`}>
+                          <p className={`text-xs mt-1 ${isFromCurrentUser ? 'text-purple-200' : 'text-gray-500'
+                            }`}>
                             {new Date(message.created_at).toLocaleString()}
                           </p>
                         </div>
@@ -306,7 +303,7 @@ export function MessageCenter({ currentUserId, messages: initialMessages, contac
                   ))}
                 </select>
               </div>
-              
+
               {selectedContact && (
                 <div className="space-y-2">
                   <Input
