@@ -542,3 +542,6 @@ export default function ChildrenManager({ user, profile, initialChildren }: { us
     </div>
   )
 }
+
+// Named export as well
+export { ChildrenManager }
