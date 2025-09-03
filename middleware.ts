@@ -14,6 +14,7 @@ export async function middleware(request: NextRequest) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         url.searchParams.set('error', 'configuration')
+        url.searchParams.set('next', request.nextUrl.pathname + (request.nextUrl.search || ''))
         return NextResponse.redirect(url)
       }
       return NextResponse.next()
@@ -36,7 +37,7 @@ export async function middleware(request: NextRequest) {
     })
 
     // Only check auth for dashboard routes
-    if (request.nextUrl.pathname.startsWith('/dashboard')) {
+  if (request.nextUrl.pathname.startsWith('/dashboard')) {
       const { data: { user }, error } = await supabase.auth.getUser()
       
       console.log('Middleware checking dashboard access for:', user?.email || 'no user')
@@ -46,6 +47,7 @@ export async function middleware(request: NextRequest) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         url.searchParams.set('error', 'Please log in to access your dashboard')
+        url.searchParams.set('next', request.nextUrl.pathname + (request.nextUrl.search || ''))
         return NextResponse.redirect(url)
       } else {
         console.log('Middleware: User authenticated, allowing dashboard access')
@@ -61,6 +63,7 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('error', 'auth_error')
+      url.searchParams.set('next', request.nextUrl.pathname + (request.nextUrl.search || ''))
       return NextResponse.redirect(url)
     }
     

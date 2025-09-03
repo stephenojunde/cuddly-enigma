@@ -10,6 +10,7 @@ export async function login(formData: FormData) {
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  const nextPath = (formData.get('next') as string | null) || null
 
   // Basic validation
   if (!email || !password) {
@@ -49,7 +50,10 @@ export async function login(formData: FormData) {
       
       console.log('About to redirect to login success page...')
     revalidatePath('/', 'layout')
-    // Go straight to dashboard after successful login
+    // Go straight to dashboard after successful login (or to provided next path)
+    if (nextPath && typeof nextPath === 'string' && nextPath.startsWith('/')) {
+      return redirect(nextPath)
+    }
     return redirect('/dashboard')
     } else {
       console.log('No user data returned from login')
