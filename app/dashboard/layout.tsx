@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard-header'
 
+// Force dynamic rendering for all dashboard pages
+export const dynamic = 'force-dynamic'
+
 type Profile = {
   id: string
   user_type: 'parent' | 'teacher' | 'school' | 'admin'

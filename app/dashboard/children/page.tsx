@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/server'
 import ChildrenManager from './ChildrenManager'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function ChildrenPage() {
   const supabase = await createClient()
   
