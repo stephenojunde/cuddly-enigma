@@ -483,3 +483,6 @@ export default function ProfileForm({ user, profile, tutorProfile }: ProfileForm
     </div>
   )
 }
+
+// Named export as well for better module resolution
+export { ProfileForm }
