@@ -18,7 +18,7 @@ interface DashboardSidebarProps {
   profile: Profile
 }
 
-export function DashboardSidebar({ user, profile }: DashboardSidebarProps) {
+export function DashboardSidebar({ profile }: DashboardSidebarProps) {
   const pathname = usePathname()
 
   const getNavigationItems = () => {
