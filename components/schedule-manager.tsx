@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { Calendar, Clock, User, Phone, Mail, Plus, Edit, Trash2 } from 'lucide-react'
+import { Calendar, Clock, User, Phone, Mail, Plus, Trash2 } from 'lucide-react'
 
 interface Schedule {
   id: string
@@ -49,7 +49,6 @@ const DAYS_OF_WEEK = [
 export function ScheduleManager({ tutorId, schedules: initialSchedules, bookings }: ScheduleManagerProps) {
   const [schedules, setSchedules] = useState(initialSchedules)
   const [isAddingSchedule, setIsAddingSchedule] = useState(false)
-  const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null)
   const { toast } = useToast()
   const supabase = createClient()
 
@@ -263,13 +262,6 @@ export function ScheduleManager({ tutorId, schedules: initialSchedules, bookings
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setEditingSchedule(schedule)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
                             onClick={() => deleteSchedule(schedule.id)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -296,6 +288,7 @@ export function ScheduleManager({ tutorId, schedules: initialSchedules, bookings
                     value={newSchedule.day_of_week}
                     onChange={(e) => setNewSchedule({...newSchedule, day_of_week: parseInt(e.target.value)})}
                     className="w-full p-2 border rounded-md"
+                    aria-label="Select day of the week"
                   >
                     {DAYS_OF_WEEK.map((day, index) => (
                       <option key={day} value={index}>{day}</option>

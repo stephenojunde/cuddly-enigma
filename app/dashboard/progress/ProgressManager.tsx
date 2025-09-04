@@ -302,7 +302,7 @@ export default function ProgressManager({
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-[#8A2BE2] h-2 rounded-full transition-all duration-300"
+                          className={`bg-[#8A2BE2] h-2 rounded-full transition-all duration-300`}
                           style={{
                             width: `${Math.min(100, Math.max(0, progress.progress_percentage))}%`
                           }}
