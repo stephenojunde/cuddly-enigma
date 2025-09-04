@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -36,9 +36,9 @@ interface TutorDiscoveryProps {
 export function TutorDiscovery({ tutors, userBookings, favorites, currentUserId }: TutorDiscoveryProps) {
   const [filteredTutors, setFilteredTutors] = useState(tutors)
   const [searchTerm, setSearchTerm] = useState('')
-  const [subjectFilter, setSubjectFilter] = useState('')
-  const [locationFilter, setLocationFilter] = useState('')
-  const [priceRange, setPriceRange] = useState('')
+  const [subjectFilter, setSubjectFilter] = useState('all')
+  const [locationFilter, setLocationFilter] = useState('all')
+  const [priceRange, setPriceRange] = useState('all')
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const { toast } = useToast()
   const supabase = createClient()
@@ -61,15 +61,15 @@ export function TutorDiscovery({ tutors, userBookings, favorites, currentUserId 
       )
     }
 
-    if (subjectFilter) {
+    if (subjectFilter && subjectFilter !== 'all') {
       filtered = filtered.filter(tutor => tutor.subjects.includes(subjectFilter))
     }
 
-    if (locationFilter) {
+    if (locationFilter && locationFilter !== 'all') {
       filtered = filtered.filter(tutor => tutor.location === locationFilter)
     }
 
-    if (priceRange) {
+    if (priceRange && priceRange !== 'all') {
       const [min, max] = priceRange.split('-').map(Number)
       filtered = filtered.filter(tutor => {
         if (max) {
@@ -110,10 +110,11 @@ export function TutorDiscovery({ tutors, userBookings, favorites, currentUserId 
         favoriteIds.add(tutorId)
         toast({ title: "Added to favorites" })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: "Error updating favorites",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive"
       })
     }
@@ -146,7 +147,7 @@ export function TutorDiscovery({ tutors, userBookings, favorites, currentUserId 
                 <SelectValue placeholder="Subject" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Subjects</SelectItem>
+                <SelectItem value="all">All Subjects</SelectItem>
                 {allSubjects.map(subject => (
                   <SelectItem key={subject} value={subject}>{subject}</SelectItem>
                 ))}
@@ -158,7 +159,7 @@ export function TutorDiscovery({ tutors, userBookings, favorites, currentUserId 
                 <SelectValue placeholder="Location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all">All Locations</SelectItem>
                 {allLocations.map(location => (
                   <SelectItem key={location} value={location}>{location}</SelectItem>
                 ))}
@@ -170,7 +171,7 @@ export function TutorDiscovery({ tutors, userBookings, favorites, currentUserId 
                 <SelectValue placeholder="Price Range" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Price</SelectItem>
+                <SelectItem value="all">Any Price</SelectItem>
                 <SelectItem value="0-20">£0 - £20/hr</SelectItem>
                 <SelectItem value="20-40">£20 - £40/hr</SelectItem>
                 <SelectItem value="40-60">£40 - £60/hr</SelectItem>
@@ -289,9 +290,9 @@ export function TutorDiscovery({ tutors, userBookings, favorites, currentUserId 
               variant="outline" 
               onClick={() => {
                 setSearchTerm('')
-                setSubjectFilter('')
-                setLocationFilter('')
-                setPriceRange('')
+                setSubjectFilter('all')
+                setLocationFilter('all')
+                setPriceRange('all')
                 setShowFavoritesOnly(false)
                 setFilteredTutors(tutors)
               }}
