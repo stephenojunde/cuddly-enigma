@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Star, MapPin, Clock, GraduationCap } from 'lucide-react'
+import { Star, MapPin, Clock, GraduationCap, Shield } from 'lucide-react'
 import Link from 'next/link'
 
 interface TutorCardProps {
@@ -20,6 +20,7 @@ interface TutorCardProps {
     bio: string
     profile_image_url?: string
     availability_status: string
+    dbs_status?: string
   }
 }
 
@@ -29,6 +30,7 @@ export default function TutorCard({ tutor }: TutorCardProps) {
   const safeLocation = tutor?.location?.toString() || 'Location not specified'
   const safeBio = tutor?.bio?.toString() || 'No bio available'
   const safeAvailability = tutor?.availability_status?.toString() || 'unknown'
+  const safeDBSStatus = tutor?.dbs_status?.toString() || 'pending'
   
   // Safe array handling
   const safeSubjects = Array.isArray(tutor?.subjects) 
@@ -70,6 +72,22 @@ export default function TutorCard({ tutor }: TutorCardProps) {
         return 'Unavailable'
       default:
         return 'Unknown'
+    }
+  }
+
+  const getDBSStatusBadge = (status: string) => {
+    const normalizedStatus = status.toString().toLowerCase()
+    switch (normalizedStatus) {
+      case 'verified':
+        return { color: 'bg-green-100 text-green-800', text: 'DBS Verified', icon: Shield }
+      case 'pending':
+        return { color: 'bg-yellow-100 text-yellow-800', text: 'DBS Pending', icon: Shield }
+      case 'expired':
+        return { color: 'bg-red-100 text-red-800', text: 'DBS Expired', icon: Shield }
+      case 'rejected':
+        return { color: 'bg-red-100 text-red-800', text: 'DBS Rejected', icon: Shield }
+      default:
+        return { color: 'bg-gray-100 text-gray-800', text: 'DBS Unknown', icon: Shield }
     }
   }
 
@@ -116,6 +134,18 @@ export default function TutorCard({ tutor }: TutorCardProps) {
           <div className="flex items-center text-sm text-gray-600">
             <GraduationCap className="w-4 h-4 mr-2" />
             {safeQualifications.length > 0 ? safeQualifications[0] : 'No qualifications listed'}
+          </div>
+          <div className="flex items-center gap-2">
+            {(() => {
+              const dbsInfo = getDBSStatusBadge(safeDBSStatus)
+              const IconComponent = dbsInfo.icon
+              return (
+                <Badge className={`${dbsInfo.color} flex items-center gap-1 text-xs`}>
+                  <IconComponent className="w-3 h-3" />
+                  {dbsInfo.text}
+                </Badge>
+              )
+            })()}
           </div>
         </div>
 

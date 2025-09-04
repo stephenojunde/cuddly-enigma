@@ -45,6 +45,7 @@ export function DashboardSidebar({ user, profile }: DashboardSidebarProps) {
           ...baseItems.slice(0, 1), // Dashboard
           { name: 'My Students', href: '/dashboard/students', icon: Users },
           { name: 'Schedule', href: '/dashboard/schedule', icon: Calendar },
+          { name: 'DBS Verification', href: '/dashboard/dbs', icon: Shield },
           { name: 'Job Applications', href: '/dashboard/applications', icon: Briefcase },
           { name: 'Resources', href: '/dashboard/resources', icon: BookOpen },
           ...baseItems.slice(1), // Profile, Messages, Settings
@@ -69,6 +70,7 @@ export function DashboardSidebar({ user, profile }: DashboardSidebarProps) {
   const adminItems = (profile?.is_admin) ? [
     { name: 'Admin Panel', href: '/dashboard/admin', icon: Shield },
     { name: 'User Management', href: '/dashboard/admin/users', icon: Users },
+    { name: 'DBS Management', href: '/dashboard/admin/dbs', icon: Shield },
     { name: 'Content Management', href: '/dashboard/admin/content', icon: FileText },
     { name: 'System Settings', href: '/dashboard/admin/system', icon: Settings },
   ] : []
