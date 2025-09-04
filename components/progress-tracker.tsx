@@ -52,14 +52,14 @@ interface RecentBooking {
 }
 
 interface ProgressTrackerProps {
-  children: Child[]
+  childrenList: Child[]
   progressReports: ProgressReport[]
   recentBookings: RecentBooking[]
   currentUserId: string
 }
 
-export function ProgressTracker({ children, progressReports, recentBookings }: ProgressTrackerProps) {
-  const [selectedChild, setSelectedChild] = useState<string>(children[0]?.id || '')
+export function ProgressTracker({ childrenList, progressReports, recentBookings }: ProgressTrackerProps) {
+  const [selectedChild, setSelectedChild] = useState<string>(childrenList[0]?.id || '')
   const [selectedSubject, setSelectedSubject] = useState<string>('all')
   const [timeRange, setTimeRange] = useState<string>('3months')
 
@@ -146,12 +146,12 @@ export function ProgressTracker({ children, progressReports, recentBookings }: P
     }
   }
 
-  const selectedChildData = children.find(child => child.id === selectedChild)
+  const selectedChildData = childrenList.find(child => child.id === selectedChild)
   const childReports = selectedChildData ? getFilteredReports(selectedChildData.id) : []
   const childBookings = selectedChildData ? getChildBookings(selectedChildData.name) : []
   const trend = getProgressTrend(childReports)
 
-  if (children.length === 0) {
+  if (childrenList.length === 0) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
@@ -176,7 +176,7 @@ export function ProgressTracker({ children, progressReports, recentBookings }: P
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {children.map((child) => (
+              {childrenList.map((child) => (
                 <SelectItem key={child.id} value={child.id}>
                   {child.name} - {child.grade}
                 </SelectItem>
@@ -448,3 +448,6 @@ export function ProgressTracker({ children, progressReports, recentBookings }: P
     </div>
   )
 }
+
+// Default export for compatibility
+export default ProgressTracker

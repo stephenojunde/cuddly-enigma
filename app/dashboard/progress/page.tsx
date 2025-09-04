@@ -15,12 +15,6 @@ export default async function ProgressPage() {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
   // Get user's children
   const { data: children } = await supabase
     .from('children')
@@ -42,7 +36,7 @@ export default async function ProgressPage() {
     .order('session_date', { ascending: false }) : { data: [] }
 
   // Get recent bookings for context
-  const { data: recentBookings } = await supabase
+  const { data: rawBookings } = await supabase
     .from('bookings')
     .select(`
       id, student_name, subject, session_date, status,
@@ -53,17 +47,25 @@ export default async function ProgressPage() {
     .order('session_date', { ascending: false })
     .limit(10)
 
+  // Transform the bookings to match the expected type
+  const recentBookings = rawBookings?.map(booking => ({
+    ...booking,
+    tutors: Array.isArray(booking.tutors) && booking.tutors.length > 0 
+      ? booking.tutors[0] 
+      : { name: 'Unknown', subjects: [] }
+  })) || []
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Progress Tracking</h1>
-        <p className="text-gray-600">Monitor your children's academic progress and achievements</p>
+        <p className="text-gray-600">Monitor your children&apos;s academic progress and achievements</p>
       </div>
       
       <ProgressTracker 
-        children={children || []}
+        childrenList={children || []}
         progressReports={progressReports || []}
-        recentBookings={recentBookings || []}
+        recentBookings={recentBookings}
         currentUserId={user.id}
       />
     </div>
