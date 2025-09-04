@@ -61,25 +61,28 @@ CREATE TABLE public.bookings (
 -- ============================================================================
 -- 3. REAL-TIME MESSAGING SYSTEM
 -- ============================================================================
+
+-- First, create conversations table
 CREATE TABLE IF NOT EXISTS public.conversations (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     participants UUID[] NOT NULL, -- Array of user IDs
     conversation_type VARCHAR(20) DEFAULT 'direct' CHECK (conversation_type IN ('direct', 'group', 'booking_related')),
     title VARCHAR(255), -- For group conversations
-    booking_id UUID REFERENCES public.bookings(id) ON DELETE SET NULL, -- For booking-related conversations
+    booking_id UUID, -- We'll add the foreign key constraint later after bookings table is created
     is_active BOOLEAN DEFAULT TRUE,
     last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Then create messages table that references conversations
 CREATE TABLE IF NOT EXISTS public.messages (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    conversation_id UUID NOT NULL REFERENCES public.conversations(id) ON DELETE CASCADE,
+    conversation_id UUID NOT NULL,
     sender_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     message_type VARCHAR(20) DEFAULT 'text' CHECK (message_type IN ('text', 'image', 'file', 'system')),
     content TEXT NOT NULL,
     attachment_url TEXT,
-    reply_to UUID REFERENCES public.messages(id), -- For threaded replies
+    reply_to UUID, -- We'll add the foreign key constraint later
     is_read BOOLEAN DEFAULT FALSE,
     read_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -195,7 +198,78 @@ CREATE TABLE IF NOT EXISTS public.sessions (
 );
 
 -- ============================================================================
--- 8. ENABLE ROW LEVEL SECURITY
+-- 8. ADD FOREIGN KEY CONSTRAINTS (After all tables are created)
+-- ============================================================================
+
+-- Add foreign key constraints that reference tables created later in the script
+DO $$ 
+BEGIN
+    -- Ensure conversation_id column exists in messages table
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'messages' 
+        AND column_name = 'conversation_id'
+        AND table_schema = 'public'
+    ) THEN
+        ALTER TABLE public.messages ADD COLUMN conversation_id UUID NOT NULL;
+    END IF;
+
+    -- Ensure reply_to column exists in messages table
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'messages' 
+        AND column_name = 'reply_to'
+        AND table_schema = 'public'
+    ) THEN
+        ALTER TABLE public.messages ADD COLUMN reply_to UUID;
+    END IF;
+
+    -- Ensure booking_id column exists in conversations table
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'conversations' 
+        AND column_name = 'booking_id'
+        AND table_schema = 'public'
+    ) THEN
+        ALTER TABLE public.conversations ADD COLUMN booking_id UUID;
+    END IF;
+
+    -- Add booking_id foreign key to conversations table
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'conversations_booking_id_fkey' 
+        AND table_name = 'conversations'
+    ) THEN
+        ALTER TABLE public.conversations 
+        ADD CONSTRAINT conversations_booking_id_fkey 
+        FOREIGN KEY (booking_id) REFERENCES public.bookings(id) ON DELETE SET NULL;
+    END IF;
+
+    -- Add conversation_id foreign key to messages table
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'messages_conversation_id_fkey' 
+        AND table_name = 'messages'
+    ) THEN
+        ALTER TABLE public.messages 
+        ADD CONSTRAINT messages_conversation_id_fkey 
+        FOREIGN KEY (conversation_id) REFERENCES public.conversations(id) ON DELETE CASCADE;
+    END IF;
+
+    -- Add reply_to foreign key to messages table (self-referencing)
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'messages_reply_to_fkey' 
+        AND table_name = 'messages'
+    ) THEN
+        ALTER TABLE public.messages 
+        ADD CONSTRAINT messages_reply_to_fkey 
+        FOREIGN KEY (reply_to) REFERENCES public.messages(id);
+    END IF;
+END $$;
+
+-- ============================================================================
+-- 9. ENABLE ROW LEVEL SECURITY
 -- ============================================================================
 ALTER TABLE public.children ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
@@ -208,13 +282,15 @@ ALTER TABLE public.availability_exceptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================================
--- 9. ROW LEVEL SECURITY POLICIES
+-- 10. ROW LEVEL SECURITY POLICIES
 -- ============================================================================
 
 -- Children Policies
+DROP POLICY IF EXISTS "Parents can manage their own children" ON public.children;
 CREATE POLICY "Parents can manage their own children" ON public.children
     FOR ALL USING (parent_id = auth.uid());
 
+DROP POLICY IF EXISTS "Tutors can view children they teach" ON public.children;
 CREATE POLICY "Tutors can view children they teach" ON public.children
     FOR SELECT USING (
         EXISTS (
@@ -225,11 +301,13 @@ CREATE POLICY "Tutors can view children they teach" ON public.children
     );
 
 -- Bookings Policies
+DROP POLICY IF EXISTS "Users can view their own bookings" ON public.bookings;
 CREATE POLICY "Users can view their own bookings" ON public.bookings
     FOR SELECT USING (
         parent_id = auth.uid() OR tutor_id = auth.uid()
     );
 
+DROP POLICY IF EXISTS "Parents can create bookings for their children" ON public.bookings;
 CREATE POLICY "Parents can create bookings for their children" ON public.bookings
     FOR INSERT WITH CHECK (
         parent_id = auth.uid() AND 
@@ -240,17 +318,21 @@ CREATE POLICY "Parents can create bookings for their children" ON public.booking
         )
     );
 
+DROP POLICY IF EXISTS "Users can update their own bookings" ON public.bookings;
 CREATE POLICY "Users can update their own bookings" ON public.bookings
     FOR UPDATE USING (parent_id = auth.uid() OR tutor_id = auth.uid());
 
 -- Conversations Policies
+DROP POLICY IF EXISTS "Users can view conversations they're part of" ON public.conversations;
 CREATE POLICY "Users can view conversations they're part of" ON public.conversations
     FOR SELECT USING (auth.uid() = ANY(participants));
 
+DROP POLICY IF EXISTS "Users can create conversations they're part of" ON public.conversations;
 CREATE POLICY "Users can create conversations they're part of" ON public.conversations
     FOR INSERT WITH CHECK (auth.uid() = ANY(participants));
 
 -- Messages Policies
+DROP POLICY IF EXISTS "Users can view messages in their conversations" ON public.messages;
 CREATE POLICY "Users can view messages in their conversations" ON public.messages
     FOR SELECT USING (
         EXISTS (
@@ -260,6 +342,7 @@ CREATE POLICY "Users can view messages in their conversations" ON public.message
         )
     );
 
+DROP POLICY IF EXISTS "Users can send messages in their conversations" ON public.messages;
 CREATE POLICY "Users can send messages in their conversations" ON public.messages
     FOR INSERT WITH CHECK (
         sender_id = auth.uid() AND
@@ -271,9 +354,11 @@ CREATE POLICY "Users can send messages in their conversations" ON public.message
     );
 
 -- Reviews Policies
+DROP POLICY IF EXISTS "Anyone can view approved reviews" ON public.reviews;
 CREATE POLICY "Anyone can view approved reviews" ON public.reviews
     FOR SELECT USING (is_approved = true);
 
+DROP POLICY IF EXISTS "Parents can create reviews for their bookings" ON public.reviews;
 CREATE POLICY "Parents can create reviews for their bookings" ON public.reviews
     FOR INSERT WITH CHECK (
         reviewer_id = auth.uid() AND
@@ -286,24 +371,30 @@ CREATE POLICY "Parents can create reviews for their bookings" ON public.reviews
     );
 
 -- Notifications Policies
+DROP POLICY IF EXISTS "Users can view their own notifications" ON public.notifications;
 CREATE POLICY "Users can view their own notifications" ON public.notifications
     FOR SELECT USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can update their own notifications" ON public.notifications;
 CREATE POLICY "Users can update their own notifications" ON public.notifications
     FOR UPDATE USING (user_id = auth.uid());
 
 -- Tutor Availability Policies
+DROP POLICY IF EXISTS "Tutors can manage their own availability" ON public.tutor_availability;
 CREATE POLICY "Tutors can manage their own availability" ON public.tutor_availability
     FOR ALL USING (tutor_id = auth.uid());
 
+DROP POLICY IF EXISTS "Anyone can view tutor availability" ON public.tutor_availability;
 CREATE POLICY "Anyone can view tutor availability" ON public.tutor_availability
     FOR SELECT USING (true);
 
 -- Availability Exceptions Policies
+DROP POLICY IF EXISTS "Tutors can manage their own availability exceptions" ON public.availability_exceptions;
 CREATE POLICY "Tutors can manage their own availability exceptions" ON public.availability_exceptions
     FOR ALL USING (tutor_id = auth.uid());
 
 -- Sessions Policies
+DROP POLICY IF EXISTS "Users can view sessions for their bookings" ON public.sessions;
 CREATE POLICY "Users can view sessions for their bookings" ON public.sessions
     FOR SELECT USING (
         EXISTS (
@@ -313,6 +404,7 @@ CREATE POLICY "Users can view sessions for their bookings" ON public.sessions
         )
     );
 
+DROP POLICY IF EXISTS "Tutors can create sessions for their bookings" ON public.sessions;
 CREATE POLICY "Tutors can create sessions for their bookings" ON public.sessions
     FOR INSERT WITH CHECK (
         EXISTS (
@@ -323,7 +415,7 @@ CREATE POLICY "Tutors can create sessions for their bookings" ON public.sessions
     );
 
 -- ============================================================================
--- 10. INDEXES FOR PERFORMANCE
+-- 11. INDEXES FOR PERFORMANCE
 -- ============================================================================
 CREATE INDEX IF NOT EXISTS idx_children_parent_id ON public.children(parent_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_parent_id ON public.bookings(parent_id);
@@ -345,7 +437,7 @@ CREATE INDEX IF NOT EXISTS idx_availability_exceptions_tutor_id ON public.availa
 CREATE INDEX IF NOT EXISTS idx_sessions_booking_id ON public.sessions(booking_id);
 
 -- ============================================================================
--- 11. UTILITY FUNCTIONS
+-- 12. UTILITY FUNCTIONS
 -- ============================================================================
 
 -- Function to generate unique booking reference
@@ -386,6 +478,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_set_booking_reference ON public.bookings;
 CREATE TRIGGER trigger_set_booking_reference
     BEFORE INSERT ON public.bookings
     FOR EACH ROW EXECUTE FUNCTION set_booking_reference();
@@ -414,12 +507,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_tutor_rating ON public.reviews;
 CREATE TRIGGER trigger_update_tutor_rating
     AFTER INSERT OR UPDATE ON public.reviews
     FOR EACH ROW EXECUTE FUNCTION update_tutor_rating();
 
 -- ============================================================================
--- 12. SAMPLE DATA FOR TESTING
+-- 13. SAMPLE DATA FOR TESTING
 -- ============================================================================
 
 -- Insert sample availability for existing tutors (if any exist)
@@ -465,22 +559,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_bookings_updated_at ON public.bookings;
 CREATE TRIGGER trigger_bookings_updated_at
     BEFORE UPDATE ON public.bookings
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS trigger_children_updated_at ON public.children;
 CREATE TRIGGER trigger_children_updated_at
     BEFORE UPDATE ON public.children
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS trigger_tutor_availability_updated_at ON public.tutor_availability;
 CREATE TRIGGER trigger_tutor_availability_updated_at
     BEFORE UPDATE ON public.tutor_availability
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS trigger_reviews_updated_at ON public.reviews;
 CREATE TRIGGER trigger_reviews_updated_at
     BEFORE UPDATE ON public.reviews
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS trigger_sessions_updated_at ON public.sessions;
 CREATE TRIGGER trigger_sessions_updated_at
     BEFORE UPDATE ON public.sessions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
