@@ -392,3 +392,6 @@ export function ScheduleManager({ tutorId, schedules: initialSchedules, bookings
     </div>
   )
 }
+
+// Default export for compatibility
+export default ScheduleManager
