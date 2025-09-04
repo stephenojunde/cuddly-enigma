@@ -86,10 +86,11 @@ export function ScheduleManager({ tutorId, schedules: initialSchedules, bookings
         title: "Schedule added",
         description: "Your availability has been updated.",
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: "Error adding schedule",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       })
     }
@@ -112,10 +113,11 @@ export function ScheduleManager({ tutorId, schedules: initialSchedules, bookings
         title: "Schedule updated",
         description: "Your availability has been updated.",
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: "Error updating schedule",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       })
     }
@@ -136,10 +138,11 @@ export function ScheduleManager({ tutorId, schedules: initialSchedules, bookings
         title: "Schedule deleted",
         description: "The schedule slot has been removed.",
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: "Error deleting schedule",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       })
     }
@@ -174,7 +177,7 @@ export function ScheduleManager({ tutorId, schedules: initialSchedules, bookings
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Today's Sessions
+            Today&apos;s Sessions
           </CardTitle>
           <CardDescription>
             {new Date().toLocaleDateString('en-US', { 
@@ -236,7 +239,7 @@ export function ScheduleManager({ tutorId, schedules: initialSchedules, bookings
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {schedulesByDay.map(({ day, dayIndex, schedules: daySchedules }) => (
+            {schedulesByDay.map(({ day, schedules: daySchedules }) => (
               <div key={day} className="border rounded-lg p-4">
                 <h3 className="font-medium text-lg mb-3">{day}</h3>
                 {daySchedules.length > 0 ? (
