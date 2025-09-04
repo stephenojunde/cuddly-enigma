@@ -2,13 +2,10 @@
 
 import { useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { createClient } from '@/lib/client'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useToast } from '@/hooks/use-toast'
 import { 
   TrendingUp, 
   Calendar, 
@@ -17,9 +14,7 @@ import {
   Clock, 
   User as UserIcon,
   BarChart3,
-  Target,
   CheckCircle2,
-  AlertCircle,
   GraduationCap
 } from 'lucide-react'
 
@@ -87,15 +82,12 @@ interface ProgressManagerProps {
 }
 
 export default function ProgressManager({ 
-  user, 
-  profile, 
   childrenList, 
   progressData, 
   recentSessions 
 }: ProgressManagerProps) {
   const [selectedChild, setSelectedChild] = useState<string>('all')
   const [selectedSubject, setSelectedSubject] = useState<string>('all')
-  const { toast } = useToast()
 
   // Filter progress data based on selections
   const filteredProgress = progressData.filter(progress => {
@@ -145,13 +137,6 @@ export default function ProgressManager({
   }
 
   const stats = getOverallStats()
-
-  const getProgressColor = (percentage: number) => {
-    if (percentage >= 80) return 'text-green-600 bg-green-50 border-green-200'
-    if (percentage >= 60) return 'text-blue-600 bg-blue-50 border-blue-200'
-    if (percentage >= 40) return 'text-yellow-600 bg-yellow-50 border-yellow-200'
-    return 'text-red-600 bg-red-50 border-red-200'
-  }
 
   const getGradeProgression = (current: string | null, target: string | null) => {
     if (!current || !target) return null
@@ -318,7 +303,9 @@ export default function ProgressManager({
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
                           className="bg-[#8A2BE2] h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${Math.min(100, Math.max(0, progress.progress_percentage))}%` }}
+                          style={{
+                            width: `${Math.min(100, Math.max(0, progress.progress_percentage))}%`
+                          }}
                         />
                       </div>
                     </div>
