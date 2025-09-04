@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Star, Users, BookOpen, Award, CheckCircle, ArrowRight } from 'lucide-react'
+import { Star, Users, BookOpen, Award, CheckCircle, ArrowRight, Shield, Clock, FileCheck, UserCheck } from 'lucide-react'
 
 export default function HomePage() {
   // Static data to avoid any database-related errors
@@ -203,6 +203,90 @@ export default function HomePage() {
                 <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">{feature.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* DBS Safety Section */}
+      <section className="py-20 bg-white border-t">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12 animate-fade-in-up">
+            <div className="flex justify-center mb-4">
+              <Shield className="w-16 h-16 text-[#8A2BE1] animate-float" />
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+              Your Child&apos;s Safety is Our Priority
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              All our tutors undergo comprehensive DBS (Disclosure and Barring Service) background checks 
+              to ensure the highest standards of child safety and protection.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <div className="text-center group hover:scale-105 transition-all duration-300 p-6 rounded-lg hover:bg-gray-50">
+              <UserCheck className="w-12 h-12 text-green-600 mx-auto mb-4 group-hover:scale-110 transition-all duration-300" />
+              <h3 className="text-lg font-bold text-gray-800 mb-2">Enhanced DBS Verified</h3>
+              <p className="text-gray-600 text-sm">All tutors have current Enhanced DBS certificates for working with children</p>
+            </div>
+            
+            <div className="text-center group hover:scale-105 transition-all duration-300 p-6 rounded-lg hover:bg-gray-50">
+              <FileCheck className="w-12 h-12 text-blue-600 mx-auto mb-4 group-hover:scale-110 transition-all duration-300" />
+              <h3 className="text-lg font-bold text-gray-800 mb-2">Admin Verified</h3>
+              <p className="text-gray-600 text-sm">Our team manually reviews and verifies every DBS certificate</p>
+            </div>
+            
+            <div className="text-center group hover:scale-105 transition-all duration-300 p-6 rounded-lg hover:bg-gray-50">
+              <Clock className="w-12 h-12 text-orange-600 mx-auto mb-4 group-hover:scale-110 transition-all duration-300" />
+              <h3 className="text-lg font-bold text-gray-800 mb-2">Regular Renewals</h3>
+              <p className="text-gray-600 text-sm">We track renewal dates and ensure all certificates stay current</p>
+            </div>
+            
+            <div className="text-center group hover:scale-105 transition-all duration-300 p-6 rounded-lg hover:bg-gray-50">
+              <Shield className="w-12 h-12 text-purple-600 mx-auto mb-4 group-hover:scale-110 transition-all duration-300" />
+              <h3 className="text-lg font-bold text-gray-800 mb-2">Transparent Status</h3>
+              <p className="text-gray-600 text-sm">See each tutor&apos;s DBS verification status clearly displayed on their profile</p>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 border border-green-200">
+            <div className="max-w-4xl mx-auto">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4 text-center">What This Means for You</h3>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                    For Parents
+                  </h4>
+                  <ul className="space-y-2 text-gray-600">
+                    <li>• Complete peace of mind when booking sessions</li>
+                    <li>• Easy identification of verified tutors with green badges</li>
+                    <li>• Transparent access to verification dates and status</li>
+                    <li>• Confidence in our commitment to child safety</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                    For Tutors
+                  </h4>
+                  <ul className="space-y-2 text-gray-600">
+                    <li>• Stand out with verified professional credentials</li>
+                    <li>• Free DBS verification service on our platform</li>
+                    <li>• Automatic renewal reminders every 3 years</li>
+                    <li>• Attract more bookings with verified status</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="text-center mt-8">
+                <p className="text-gray-600 mb-4">
+                  <strong>Remember:</strong> DBS verification is completely free on our platform and helps create a safer learning environment for everyone! 🛡️
+                </p>
+                <Button asChild className="hover:scale-105 transition-all duration-300">
+                  <Link href="/tutors">Browse Verified Tutors</Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
