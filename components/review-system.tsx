@@ -1,8 +1,10 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/client'
+import { useState, useEffect, useCallback } from 'react'
+import { createClient } from '@/lib/client'
 import { Star, CheckCircle, Clock, Eye } from 'lucide-react'
+
+const supabase = createClient()
 
 interface Booking {
   id: string
@@ -75,34 +77,7 @@ export default function ReviewSystem({ mode = 'manage', tutorId, bookingId }: Re
     would_recommend: true
   })
 
-  useEffect(() => {
-    loadData()
-  }, [mode, tutorId, bookingId])
-
-  const loadData = async () => {
-    try {
-      setLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        setError('Please log in to access reviews')
-        return
-      }
-
-      if (mode === 'create' || mode === 'manage') {
-        await loadCompletedBookings()
-      }
-      
-      await loadReviews()
-    } catch (err) {
-      setError('Failed to load review data')
-      console.error('Error loading data:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const loadCompletedBookings = async () => {
+  const loadCompletedBookings = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
@@ -130,8 +105,8 @@ export default function ReviewSystem({ mode = 'manage', tutorId, bookingId }: Re
 
       if (error) throw error
 
-      // Filter out bookings that already have reviews
-      const bookingsWithoutReviews = []
+      // Filter out bookings that already have reviews and fix the data structure
+      const bookingsWithoutReviews: Booking[] = []
       for (const booking of data || []) {
         const { data: existingReview } = await supabase
           .from('reviews')
@@ -140,7 +115,13 @@ export default function ReviewSystem({ mode = 'manage', tutorId, bookingId }: Re
           .single()
 
         if (!existingReview) {
-          bookingsWithoutReviews.push(booking)
+          // Fix the data structure: tutor and child come as arrays but we need single objects
+          const processedBooking: Booking = {
+            ...booking,
+            tutor: Array.isArray(booking.tutor) ? booking.tutor[0] : booking.tutor,
+            child: Array.isArray(booking.child) ? booking.child[0] : booking.child
+          }
+          bookingsWithoutReviews.push(processedBooking)
         }
       }
 
@@ -148,9 +129,9 @@ export default function ReviewSystem({ mode = 'manage', tutorId, bookingId }: Re
     } catch (err) {
       console.error('Error loading completed bookings:', err)
     }
-  }
+  }, [bookingId])
 
-  const loadReviews = async () => {
+  const loadReviews = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
@@ -179,7 +160,34 @@ export default function ReviewSystem({ mode = 'manage', tutorId, bookingId }: Re
     } catch (err) {
       console.error('Error loading reviews:', err)
     }
-  }
+  }, [mode, tutorId])
+
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        setError('Please log in to access reviews')
+        return
+      }
+
+      if (mode === 'create' || mode === 'manage') {
+        await loadCompletedBookings()
+      }
+      
+      await loadReviews()
+    } catch (err) {
+      setError('Failed to load review data')
+      console.error('Error loading data:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [mode, loadCompletedBookings, loadReviews])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   const resetForm = () => {
     setFormData({
@@ -265,18 +273,6 @@ export default function ReviewSystem({ mode = 'manage', tutorId, bookingId }: Re
         ))}
       </div>
     )
-  }
-
-  const getAverageRating = (review: Review) => {
-    const ratings = [
-      review.overall_rating,
-      review.teaching_quality,
-      review.communication,
-      review.punctuality,
-      review.preparation
-    ].filter(r => r !== null && r !== undefined) as number[]
-    
-    return ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0
   }
 
   if (loading) {

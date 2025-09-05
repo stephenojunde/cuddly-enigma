@@ -1,8 +1,10 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/client'
+import { useState, useEffect, useCallback } from 'react'
+import { createClient } from '@/lib/client'
 import { Calendar, Clock, User, MapPin, Star, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
+
+const supabase = createClient()
 
 interface BookingSystemProps {
   tutorId?: string
@@ -56,29 +58,65 @@ export default function BookingSystem({ tutorId, parentId, mode = 'create' }: Bo
   const [error, setError] = useState<string | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   // Form state for creating new booking
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    tutor_id: string
+    child_id: string
+    subject: string
+    session_type: 'regular' | 'trial' | 'assessment' | 'makeup'
+    scheduled_date: string
+    scheduled_time: string
+    duration_minutes: number
+    session_format: 'online' | 'in-person' | 'hybrid'
+    location: string
+    special_requirements: string
+    session_fee: number
+  }>({
     tutor_id: tutorId || '',
     child_id: '',
     subject: '',
-    session_type: 'regular' as const,
+    session_type: 'regular',
     scheduled_date: '',
     scheduled_time: '',
     duration_minutes: 60,
-    session_format: 'online' as const,
+    session_format: 'online',
     location: '',
     special_requirements: '',
     session_fee: 0
   })
 
-  useEffect(() => {
-    if (mode === 'create' || mode === 'manage') {
-      loadInitialData()
-    } else if (mode === 'view') {
-      loadBookings()
-    }
-  }, [mode, tutorId, parentId])
+  const loadBookings = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-  const loadInitialData = async () => {
+      let query = supabase
+        .from('bookings')
+        .select(`
+          *,
+          child:children(id, name, age, school_year),
+          tutor:profiles!tutor_id(id, full_name)
+        `)
+
+      if (tutorId) {
+        query = query.eq('tutor_id', tutorId)
+      } else if (parentId) {
+        query = query.eq('parent_id', parentId)
+      } else {
+        // Load bookings for current user
+        query = query.or(`parent_id.eq.${user.id},tutor_id.eq.${user.id}`)
+      }
+
+      const { data, error } = await query.order('scheduled_date', { ascending: true })
+
+      if (error) throw error
+      setBookings(data || [])
+    } catch (err) {
+      setError('Failed to load bookings')
+      console.error('Error loading bookings:', err)
+    }
+  }, [tutorId, parentId])
+
+  const loadInitialData = useCallback(async () => {
     try {
       setLoading(true)
       const { data: { user } } = await supabase.auth.getUser()
@@ -121,39 +159,15 @@ export default function BookingSystem({ tutorId, parentId, mode = 'create' }: Bo
     } finally {
       setLoading(false)
     }
-  }
+  }, [loadBookings])
 
-  const loadBookings = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      let query = supabase
-        .from('bookings')
-        .select(`
-          *,
-          child:children(id, name, age, school_year),
-          tutor:profiles!tutor_id(id, full_name)
-        `)
-
-      if (tutorId) {
-        query = query.eq('tutor_id', tutorId)
-      } else if (parentId) {
-        query = query.eq('parent_id', parentId)
-      } else {
-        // Load bookings for current user
-        query = query.or(`parent_id.eq.${user.id},tutor_id.eq.${user.id}`)
-      }
-
-      const { data, error } = await query.order('scheduled_date', { ascending: true })
-
-      if (error) throw error
-      setBookings(data || [])
-    } catch (err) {
-      setError('Failed to load bookings')
-      console.error('Error loading bookings:', err)
+  useEffect(() => {
+    if (mode === 'create' || mode === 'manage') {
+      loadInitialData()
+    } else if (mode === 'view') {
+      loadBookings()
     }
-  }
+  }, [mode, tutorId, parentId, loadInitialData, loadBookings])
 
   const createBooking = async (e: React.FormEvent) => {
     e.preventDefault()

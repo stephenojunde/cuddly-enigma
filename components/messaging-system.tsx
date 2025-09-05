@@ -1,8 +1,11 @@
 "use client"
 
-import { useState, useEffect, useRef } from 'react'
-import { supabase } from '@/lib/client'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { createClient } from '@/lib/client'
 import { Send, MessageCircle, User, Search, MoreVertical, Paperclip, Smile } from 'lucide-react'
+import Image from 'next/image'
+
+const supabase = createClient()
 
 interface User {
   id: string
@@ -57,22 +60,27 @@ export default function MessagingSystem() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    initialize()
-  }, [])
+  const setupRealtimeSubscriptions = useCallback(() => {
+    // Subscribe to new messages
+    const messageSubscription = supabase
+      .channel('messages')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          if (currentConversation && payload.new.conversation_id === currentConversation.id) {
+            loadMessages(currentConversation.id)
+          }
+          loadConversations() // Refresh conversation list
+        }
+      )
+      .subscribe()
 
-  useEffect(() => {
-    if (currentConversation) {
-      loadMessages(currentConversation.id)
-      markMessagesAsRead(currentConversation.id)
+    return () => {
+      messageSubscription.unsubscribe()
     }
   }, [currentConversation])
 
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const initialize = async () => {
+  const initialize = useCallback(async () => {
     try {
       setLoading(true)
       const { data: { user } } = await supabase.auth.getUser()
@@ -105,7 +113,22 @@ export default function MessagingSystem() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [setupRealtimeSubscriptions])
+
+  useEffect(() => {
+    initialize()
+  }, [initialize])
+
+  useEffect(() => {
+    if (currentConversation) {
+      loadMessages(currentConversation.id)
+      markMessagesAsRead(currentConversation.id)
+    }
+  }, [currentConversation])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   const loadConversations = async () => {
     try {
@@ -131,7 +154,7 @@ export default function MessagingSystem() {
       // Process conversations to get other participants
       const processedConversations = await Promise.all(
         (data || []).map(async (conv) => {
-          const otherParticipantIds = conv.participants.filter(p => p !== user.id)
+          const otherParticipantIds = conv.participants.filter((p: string) => p !== user.id)
           let otherParticipant = null
 
           if (otherParticipantIds.length > 0) {
@@ -192,26 +215,6 @@ export default function MessagingSystem() {
       setUsers(data || [])
     } catch (err) {
       console.error('Error loading users:', err)
-    }
-  }
-
-  const setupRealtimeSubscriptions = () => {
-    // Subscribe to new messages
-    const messageSubscription = supabase
-      .channel('messages')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'messages' },
-        (payload) => {
-          if (currentConversation && payload.new.conversation_id === currentConversation.id) {
-            loadMessages(currentConversation.id)
-          }
-          loadConversations() // Refresh conversation list
-        }
-      )
-      .subscribe()
-
-    return () => {
-      messageSubscription.unsubscribe()
     }
   }
 
@@ -379,10 +382,12 @@ export default function MessagingSystem() {
                 <div className="flex items-start space-x-3">
                   <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
                     {conversation.other_participant?.avatar_url ? (
-                      <img
+                      <Image
                         src={conversation.other_participant.avatar_url}
                         alt={conversation.other_participant.full_name}
-                        className="w-10 h-10 rounded-full object-cover"
+                        width={40}
+                        height={40}
+                        className="rounded-full object-cover"
                       />
                     ) : (
                       <User className="w-5 h-5 text-gray-600" />
@@ -432,10 +437,12 @@ export default function MessagingSystem() {
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
                     {currentConversation.other_participant?.avatar_url ? (
-                      <img
+                      <Image
                         src={currentConversation.other_participant.avatar_url}
                         alt={currentConversation.other_participant.full_name}
-                        className="w-8 h-8 rounded-full object-cover"
+                        width={32}
+                        height={32}
+                        className="rounded-full object-cover"
                       />
                     ) : (
                       <User className="w-4 h-4 text-gray-600" />
@@ -549,7 +556,13 @@ export default function MessagingSystem() {
                   />
                   <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
                     {user.avatar_url ? (
-                      <img src={user.avatar_url} alt={user.full_name} className="w-8 h-8 rounded-full object-cover" />
+                      <Image 
+                        src={user.avatar_url} 
+                        alt={user.full_name} 
+                        width={32}
+                        height={32}
+                        className="rounded-full object-cover" 
+                      />
                     ) : (
                       <User className="w-4 h-4 text-gray-600" />
                     )}

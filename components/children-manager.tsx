@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/client'
-import { User, Plus, Edit2, Trash2, Calendar, BookOpen } from 'lucide-react'
+import { createClient } from '@/lib/client'
+import { User, Plus, Edit2, Trash2, BookOpen, Calendar } from 'lucide-react'
+
+const supabase = createClient()
 
 interface Child {
   id: string
