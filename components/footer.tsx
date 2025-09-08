@@ -7,10 +7,12 @@ export function Footer() {
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-lg font-bold text-white flex items-center">
-              <Image src="/images/logo 2.png" alt="Tutelage Services Logo" width={24} height={24} className="h-6 w-6 mr-2" />
-              Tutelage Services
-            </h3>
+            <Link href="/" className="group">
+              <h3 className="text-lg font-bold text-white flex items-center group-hover:text-gray-200 transition-colors">
+                <Image src="/images/logo 2.png" alt="Tutelage Services Logo" width={24} height={24} className="h-6 w-6 mr-2" />
+                Tutelage Services
+              </h3>
+            </Link>
             <p className="text-gray-400 mt-2">
               We are a leading education recruitment agency, helping teachers and support staff find their next role in schools across the UK.
             </p>
@@ -19,6 +21,7 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-bold text-white">Quick Links</h3>
             <ul className="mt-2 space-y-2">
+              <li><Link href="/" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
               <li><Link href="/schools" className="text-gray-400 hover:text-white transition-colors">Schools</Link></li>
               <li><Link href="/jobs" className="text-gray-400 hover:text-white transition-colors">Jobs</Link></li>
               <li><Link href="/parents" className="text-gray-400 hover:text-white transition-colors">Parents</Link></li>

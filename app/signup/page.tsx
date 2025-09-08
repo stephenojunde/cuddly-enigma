@@ -9,7 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
 
 function SignupForm() {
   const [isLoading, setIsLoading] = useState(false)
@@ -58,6 +60,27 @@ function SignupForm() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      {/* Back to Homepage Link */}
+      <Link 
+        href="/" 
+        className="fixed top-6 left-6 flex items-center space-x-2 text-[#8A2BE1] hover:text-[#5d1a9a] transition-colors duration-200 z-10"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span className="font-medium">Back to Home</span>
+      </Link>
+
+      {/* Logo */}
+      <Link href="/" className="fixed top-6 left-1/2 transform -translate-x-1/2 z-10">
+        <Image 
+          src="/images/logo 1.png" 
+          alt="Tutelage Services Logo" 
+          width={120} 
+          height={32} 
+          className="h-8 w-auto hover:scale-105 transition-transform duration-300" 
+          priority
+        />
+      </Link>
+
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>

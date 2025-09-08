@@ -12,7 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Bell, Settings, LogOut } from 'lucide-react'
+import { Bell, Settings, LogOut, Home } from 'lucide-react'
+import Link from 'next/link'
 
 interface Profile {
   id: string
@@ -54,6 +55,12 @@ export function DashboardHeader({ user, profile, currentDate }: DashboardHeaderP
         </div>
         
         <div className="flex items-center space-x-4">
+          <Link href="/" target="_blank" rel="noopener noreferrer">
+            <Button variant="ghost" size="icon" title="Visit Homepage">
+              <Home className="h-5 w-5" />
+            </Button>
+          </Link>
+          
           <Button variant="ghost" size="icon">
             <Bell className="h-5 w-5" />
           </Button>
@@ -81,6 +88,12 @@ export function DashboardHeader({ user, profile, currentDate }: DashboardHeaderP
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/" target="_blank" rel="noopener noreferrer" className="flex items-center w-full">
+                  <Home className="mr-2 h-4 w-4" />
+                  Visit Homepage
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
