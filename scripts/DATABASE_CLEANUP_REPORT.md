@@ -1,9 +1,11 @@
 # DATABASE CLEANUP REPORT
+
 ## Analysis of Current Database vs SQL Scripts
 
 ### CURRENT DATABASE STRUCTURE (From Audit)
+
 - **28 Tables** in public schema
-- **12 Functions** 
+- **12 Functions**
 - **51 RLS Policies**
 - **25 Foreign Key Constraints**
 - **1 Storage Bucket**
@@ -11,22 +13,27 @@
 ### KEY FINDINGS
 
 #### 1. DUPLICATE TABLE STRUCTURES IDENTIFIED
+
 The audit revealed some concerning duplications:
 
 **Sessions Table Issues:**
+
 - The `sessions` table appears to have **duplicate ID columns** (two `id` fields)
 - Mix of auth session fields and tutoring session fields in same table
 - This suggests multiple creation scripts created conflicting structures
 
 **Messages Table Issues:**
+
 - Multiple timestamp fields (`created_at`, `updated_at`, `inserted_at`)
 - Inconsistent data types (some timestamp with/without timezone)
 
 #### 2. REDUNDANT SQL SCRIPTS TO CLEAN UP
+
 Based on your workspace, these scripts can likely be consolidated:
 
 **Redundant Files:**
-- `001_create_tables.sql` 
+
+- `001_create_tables.sql`
 - `001_create_tables_fixed.sql`
 - `009_create_profiles_table.sql`
 - `009_create_profiles_table_fixed.sql`
@@ -35,6 +42,7 @@ Based on your workspace, these scripts can likely be consolidated:
 - `010_fix_profiles_table.sql`
 
 **Keep These:**
+
 - `002_seed_data.sql` (sample data)
 - `003_seed_sample_data.sql` (more sample data)
 - `004_create_functions.sql` (database functions)
@@ -45,26 +53,30 @@ Based on your workspace, these scripts can likely be consolidated:
 #### 3. SCHEMA INCONSISTENCIES
 
 **Data Type Inconsistencies:**
+
 - Mixed use of `VARCHAR` vs `TEXT`
 - Inconsistent timestamp types (`TIMESTAMP WITH TIME ZONE` vs `TIMESTAMP WITHOUT TIME ZONE`)
 - Some foreign keys missing proper constraints
 
 **Naming Inconsistencies:**
+
 - Some tables use `created_at`, others use `inserted_at`
 - Mixed naming conventions (snake_case vs camelCase in some fields)
 
 ### RECOMMENDED CLEANUP ACTIONS
 
 #### Phase 1: Script Consolidation
+
 1. **Delete redundant files:**
    - Remove all the "fixed" and debug versions
    - Keep only the working versions
-   
+
 2. **Create master schema:**
    - ✅ **DONE**: Created `00_MASTER_SCHEMA.sql` with clean structure
 
 #### Phase 2: Database Fixes (CAUTION REQUIRED)
-**🚨 WARNING: These require careful planning as they affect live data**
+
+🚨 **WARNING: These require careful planning as they affect live data**
 
 1. **Fix Sessions table:**
    - The duplicate ID issue needs investigation
@@ -79,6 +91,7 @@ Based on your workspace, these scripts can likely be consolidated:
    - Add missing cascade rules
 
 #### Phase 3: Migration Strategy
+
 1. **Backup current database** (ESSENTIAL)
 2. **Test schema changes on copy**
 3. **Create migration scripts for data preservation**
@@ -86,10 +99,11 @@ Based on your workspace, these scripts can likely be consolidated:
 
 ### IMMEDIATE SAFE ACTIONS
 
-#### Files You Can Delete Now (Safe):
-```
+#### Files You Can Delete Now (Safe)
+
+```text
 scripts/001_create_tables.sql
-scripts/001_create_tables_fixed.sql  
+scripts/001_create_tables_fixed.sql
 scripts/009_create_profiles_table.sql
 scripts/009_create_profiles_table_fixed.sql
 scripts/009_fix_profiles_table.sql
@@ -97,12 +111,13 @@ scripts/010_debug_auth_issues.sql
 scripts/010_fix_profiles_table.sql
 ```
 
-#### Your New Clean Structure:
-```
+#### Your New Clean Structure
+
+```text
 scripts/
 ├── 00_MASTER_SCHEMA.sql           ← NEW: Complete clean schema
 ├── 002_seed_data.sql              ← KEEP: Sample data
-├── 003_seed_sample_data.sql       ← KEEP: More sample data  
+├── 003_seed_sample_data.sql       ← KEEP: More sample data
 ├── 004_create_functions.sql       ← KEEP: Database functions
 ├── 006_dashboard_tables.sql       ← KEEP: Dashboard features
 ├── 007_additional_tables.sql      ← KEEP: Extended features
