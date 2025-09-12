@@ -89,13 +89,10 @@ export default function BookingSystem({ tutorId, parentId, mode = 'create' }: Bo
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      // First, try a simple query without joins to test table access
       let query = supabase
         .from('bookings')
-        .select(`
-          *,
-          child:children(id, name, age, school_year),
-          tutor:profiles!tutor_id(id, full_name)
-        `)
+        .select('*')
 
       if (tutorId) {
         query = query.eq('tutor_id', tutorId)
@@ -108,11 +105,26 @@ export default function BookingSystem({ tutorId, parentId, mode = 'create' }: Bo
 
       const { data, error } = await query.order('scheduled_date', { ascending: true })
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
+        throw error
+      }
+      
+      console.log('Raw bookings data:', data)
       setBookings(data || [])
     } catch (err) {
       setError('Failed to load bookings')
-      console.error('Error loading bookings:', err)
+      console.error('Error loading bookings:', {
+        error: err,
+        message: err?.message || 'Unknown error',
+        stack: err?.stack,
+        name: err?.name
+      })
     }
   }, [tutorId, parentId])
 
@@ -127,35 +139,53 @@ export default function BookingSystem({ tutorId, parentId, mode = 'create' }: Bo
       }
 
       // Load user profile to determine user type
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single()
 
+      if (profileError) {
+        console.error('Error loading profile:', profileError)
+        setError('Failed to load user profile')
+        return
+      }
+
       if (profile?.user_type === 'parent') {
         // Load children for parent
-        const { data: childrenData } = await supabase
+        const { data: childrenData, error: childrenError } = await supabase
           .from('children')
           .select('*')
           .eq('parent_id', user.id)
 
-        setChildren(childrenData || [])
+        if (childrenError) {
+          console.error('Error loading children:', childrenError)
+        } else {
+          setChildren(childrenData || [])
+        }
 
         // Load available tutors
-        const { data: tutorsData } = await supabase
+        const { data: tutorsData, error: tutorsError } = await supabase
           .from('tutors')
           .select('id, name, subjects, hourly_rate, profile_id')
           .eq('is_active', true)
 
-        setTutors(tutorsData || [])
+        if (tutorsError) {
+          console.error('Error loading tutors:', tutorsError)
+        } else {
+          setTutors(tutorsData || [])
+        }
       }
 
       // Load existing bookings
       await loadBookings()
     } catch (err) {
       setError('Failed to load booking data')
-      console.error('Error loading initial data:', err)
+      console.error('Error loading initial data:', {
+        error: err,
+        message: err?.message || 'Unknown error',
+        stack: err?.stack
+      })
     } finally {
       setLoading(false)
     }

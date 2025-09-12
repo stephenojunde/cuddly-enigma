@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,19 +10,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { X, Upload } from 'lucide-react'
+import { getSubjectsClient, getTeachingLevelsClient } from '@/lib/subjects'
 
 export function TutorApplicationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [subjects, setSubjects] = useState<string[]>([])
   const [newSubject, setNewSubject] = useState('')
+  const [availableSubjects, setAvailableSubjects] = useState<string[]>([])
+  const [teachingLevels, setTeachingLevels] = useState<string[]>([])
   const { toast } = useToast()
   const supabase = createClient()
 
-  const availableSubjects = [
-    'Mathematics', 'English Literature', 'English Language', 'Physics', 'Chemistry', 
-    'Biology', 'History', 'Geography', 'French', 'Spanish', 'German', 'Art', 
-    'Music', 'Computer Science', 'Economics', 'Psychology', 'Sociology'
-  ]
+  // Fetch dynamic data on component mount
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [subjectsData, levelsData] = await Promise.all([
+          getSubjectsClient(),
+          getTeachingLevelsClient()
+        ])
+        setAvailableSubjects(subjectsData)
+        setTeachingLevels(levelsData)
+      } catch (error) {
+        console.warn('Failed to load dynamic data, using fallbacks:', error)
+        // Fallback data if API fails
+        setAvailableSubjects([
+          'Mathematics', 'English Literature', 'English Language', 'Physics', 'Chemistry', 
+          'Biology', 'History', 'Geography', 'French', 'Spanish', 'German', 'Art', 
+          'Music', 'Computer Science', 'Economics', 'Psychology', 'Sociology'
+        ])
+        setTeachingLevels(['Primary', 'KS1', 'KS2', 'KS3', 'GCSE', 'A-Level', 'University', 'Adult'])
+      }
+    }
+    loadData()
+  }, [])
 
   const addSubject = (subject: string) => {
     if (subject && !subjects.includes(subject)) {
@@ -157,7 +178,7 @@ export function TutorApplicationForm() {
             <div>
               <Label>Teaching Levels *</Label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
-                {['Primary', 'KS1', 'KS2', 'KS3', 'GCSE', 'A-Level', 'University', 'Adult'].map(level => (
+                {teachingLevels.map(level => (
                   <label key={level} className="flex items-center space-x-2">
                     <input type="checkbox" name="levels" value={level} />
                     <span className="text-sm">{level}</span>

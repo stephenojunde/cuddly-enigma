@@ -4,44 +4,121 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Star, Users, BookOpen, Award, CheckCircle, ArrowRight, Shield, Clock, FileCheck, UserCheck } from 'lucide-react'
+import { createClient } from '@/lib/server'
 
-export default function HomePage() {
-  // Static data to avoid any database-related errors
-  const featuredTutors = [
-    {
-      id: '1',
-      name: 'Sarah Johnson',
-      subjects: ['Mathematics', 'Physics'],
-      rating: 4.9,
-      reviews: 127,
-      hourly_rate: 35,
-  avatar_url: '/images/SarahJohnson.jpg'
+export default async function HomePage() {
+  const supabase = await createClient()
+  
+  // Fetch featured tutors from database
+  const { data: featuredTutors } = await supabase
+    .from('tutors')
+    .select('id, name, subjects, rating, total_reviews, hourly_rate, avatar_url')
+    .eq('is_featured', true)
+    .eq('is_active', true)
+    .limit(3)
+
+  // Calculate real statistics
+  const [
+    { count: activeTutorsCount },
+    { count: subjectsCount },
+    { count: completedBookings },
+    { count: totalBookings },
+    { data: ratingsData }
+  ] = await Promise.all([
+    // Active tutors count
+    supabase
+      .from('tutors')
+      .select('id', { count: 'exact' })
+      .eq('is_active', true),
+    
+    // Subjects count
+    supabase
+      .from('subjects')
+      .select('id', { count: 'exact' })
+      .eq('is_active', true),
+    
+    // Completed bookings
+    supabase
+      .from('bookings')
+      .select('id', { count: 'exact' })
+      .eq('status', 'completed'),
+    
+    // Total bookings
+    supabase
+      .from('bookings')
+      .select('id', { count: 'exact' }),
+    
+    // Average rating data
+    supabase
+      .from('tutors')
+      .select('rating')
+      .not('rating', 'is', null)
+      .gt('rating', 0)
+  ])
+
+  // Calculate success rate
+  const successRate = (totalBookings && completedBookings && totalBookings > 0) 
+    ? Math.round((completedBookings / totalBookings) * 100) 
+    : 0
+  
+  // Calculate average rating
+  const avgRating = ratingsData && ratingsData.length > 0 
+    ? (ratingsData.reduce((sum, t) => sum + t.rating, 0) / ratingsData.length).toFixed(1)
+    : '0.0'
+
+  // Prepare stats with real data
+  const stats = [
+    { 
+      icon: Users, 
+      label: 'Active Tutors', 
+      value: activeTutorsCount && activeTutorsCount > 0 ? `${activeTutorsCount}+` : '0' 
     },
-    {
-      id: '2', 
-      name: 'Michael Chen',
-      subjects: ['English Literature', 'History'],
-      rating: 4.8,
-      reviews: 89,
-      hourly_rate: 30,
-  avatar_url: '/images/MichaelChen.jpg'
+    { 
+      icon: BookOpen, 
+      label: 'Subjects Covered', 
+      value: subjectsCount && subjectsCount > 0 ? `${subjectsCount}+` : '0' 
     },
-    {
-      id: '3',
-      name: 'Emma Williams',
-      subjects: ['Chemistry', 'Biology'],
-      rating: 4.9,
-      reviews: 156,
-      hourly_rate: 40,
-  avatar_url: '/images/EmmaWilliams.jpg'
+    { 
+      icon: Award, 
+      label: 'Success Rate', 
+      value: `${successRate}%` 
+    },
+    { 
+      icon: Star, 
+      label: 'Average Rating', 
+      value: avgRating 
     }
   ]
 
-  const stats = [
-    { icon: Users, label: 'Active Tutors', value: '2,500+' },
-    { icon: BookOpen, label: 'Subjects Covered', value: '50+' },
-    { icon: Award, label: 'Success Rate', value: '98%' },
-    { icon: Star, label: 'Average Rating', value: '4.9' }
+  // Fallback featured tutors if none in database
+  const displayFeaturedTutors = featuredTutors && featuredTutors.length > 0 ? featuredTutors : [
+    {
+      id: 'sample-1',
+      name: 'Expert Mathematics Tutor',
+      subjects: ['Mathematics', 'Physics'],
+      rating: 4.8,
+      total_reviews: 50,
+      hourly_rate: 35,
+      avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+    },
+    {
+      id: 'sample-2', 
+      name: 'English Literature Specialist',
+      subjects: ['English Literature', 'Creative Writing'],
+      rating: 4.9,
+      total_reviews: 85,
+      hourly_rate: 30,
+      avatar_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b566?w=150&h=150&fit=crop&crop=face'
+    },
+    {
+      id: 'sample-3',
+      name: 'Science Expert',
+      subjects: ['Chemistry', 'Biology'],
+      rating: 4.7,
+      total_reviews: 42,
+      hourly_rate: 40,
+      avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+    }
   ]
 
   const features = [
@@ -129,7 +206,7 @@ export default function HomePage() {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {featuredTutors.map((tutor, index) => (
+            {displayFeaturedTutors.map((tutor, index) => (
               <Card 
                 key={tutor.id} 
                 className={`hover:shadow-xl transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-scale-in stagger-${index + 1} group cursor-pointer`}
@@ -146,9 +223,9 @@ export default function HomePage() {
                   </div>
                   <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-[#8A2BE1] transition-colors duration-300">{tutor.name}</h3>
                   <div className="flex flex-wrap justify-center gap-2 mb-3">
-                    {tutor.subjects.map((subject, index) => (
+                    {Array.isArray(tutor.subjects) && tutor.subjects.map((subject, idx) => (
                       <Badge 
-                        key={index} 
+                        key={idx} 
                         variant="secondary"
                         className="hover:bg-[#8A2BE1] hover:text-white transition-all duration-300"
                       >
@@ -159,11 +236,11 @@ export default function HomePage() {
                   <div className="flex items-center justify-center mb-3">
                     <Star className="w-4 h-4 text-yellow-400 fill-current mr-1 animate-pulse" />
                     <span className="text-sm text-gray-600">
-                      {tutor.rating} ({tutor.reviews} reviews)
+                      {tutor.rating || 0} ({tutor.total_reviews || 0} reviews)
                     </span>
                   </div>
                   <p className="text-lg font-bold text-[#8A2BE1] group-hover:scale-110 transition-transform duration-300">
-                    £{tutor.hourly_rate}/hour
+                    £{tutor.hourly_rate || 0}/hour
                   </p>
                 </CardContent>
               </Card>
