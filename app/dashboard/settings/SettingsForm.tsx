@@ -25,7 +25,6 @@ interface Profile {
     marketing_emails?: boolean
   }
   preferences?: {
-    theme?: string
     language?: string
     timezone?: string
     currency?: string
@@ -55,7 +54,6 @@ export default function SettingsForm({ user, profile }: SettingsFormProps) {
   })
 
   const [preferences, setPreferences] = useState({
-    theme: profile?.preferences?.theme ?? 'light',
     language: profile?.preferences?.language ?? 'en',
     timezone: profile?.preferences?.timezone ?? 'Europe/London',
     currency: profile?.preferences?.currency ?? 'GBP',
@@ -362,22 +360,6 @@ export default function SettingsForm({ user, profile }: SettingsFormProps) {
           <CardContent>
             <form onSubmit={handlePreferencesSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="theme">Theme</Label>
-                  <Select value={preferences.theme} onValueChange={(value) => 
-                    setPreferences(prev => ({ ...prev, theme: value }))
-                  }>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="light">Light</SelectItem>
-                      <SelectItem value="dark">Dark</SelectItem>
-                      <SelectItem value="system">System</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 <div>
                   <Label htmlFor="language">Language</Label>
                   <Select value={preferences.language} onValueChange={(value) => 

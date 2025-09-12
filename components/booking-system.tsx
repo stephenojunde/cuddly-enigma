@@ -121,9 +121,9 @@ export default function BookingSystem({ tutorId, parentId, mode = 'create' }: Bo
       setError('Failed to load bookings')
       console.error('Error loading bookings:', {
         error: err,
-        message: err?.message || 'Unknown error',
-        stack: err?.stack,
-        name: err?.name
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined
       })
     }
   }, [tutorId, parentId])
@@ -183,8 +183,8 @@ export default function BookingSystem({ tutorId, parentId, mode = 'create' }: Bo
       setError('Failed to load booking data')
       console.error('Error loading initial data:', {
         error: err,
-        message: err?.message || 'Unknown error',
-        stack: err?.stack
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined
       })
     } finally {
       setLoading(false)
