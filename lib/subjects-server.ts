@@ -1,8 +1,8 @@
-import { createClient } from '@/lib/client'
+import { createClient } from '@/lib/server'
 
-// Client-side version for use in components
-export async function getSubjectsClient(category?: string) {
-  const supabase = createClient()
+// Server-side: Fetch all active subjects from database
+export async function getSubjects(category?: string) {
+  const supabase = await createClient()
   
   let query = supabase
     .from('subjects')
@@ -18,6 +18,7 @@ export async function getSubjectsClient(category?: string) {
 
   if (error) {
     console.warn('Error fetching subjects:', error)
+    // Fallback to common subjects if database query fails
     return [
       'Mathematics', 'Physics', 'Chemistry', 'Biology', 'English Literature',
       'English Language', 'History', 'Geography', 'French', 'Spanish',
@@ -28,9 +29,9 @@ export async function getSubjectsClient(category?: string) {
   return subjects?.map(subject => subject.name) || []
 }
 
-// Client-side version for teaching levels
-export async function getTeachingLevelsClient() {
-  const supabase = createClient()
+// Server-side: Fetch all active teaching levels from database
+export async function getTeachingLevels() {
+  const supabase = await createClient()
   
   const { data: levels, error } = await supabase
     .from('teaching_levels')
@@ -40,6 +41,7 @@ export async function getTeachingLevelsClient() {
 
   if (error) {
     console.warn('Error fetching teaching levels:', error)
+    // Fallback to common levels if database query fails
     return ['Primary', 'KS1', 'KS2', 'KS3', 'GCSE', 'A-Level', 'University', 'Adult']
   }
 
