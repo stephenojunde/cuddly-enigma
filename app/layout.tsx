@@ -15,8 +15,8 @@ const playfair = Playfair_Display({
 })
 
 export const metadata = {
-  title: 'Tutelage Services - Leading Education Recruitment Agency',
-  description: 'We are a leading education recruitment agency, helping teachers and support staff find their next role in schools across the UK.',
+  title: 'Tutelage Services - Supply Teachers & Cover Supervisors',
+  description: 'Prompt, dependable supply teachers and cover supervisors for educational institutions. We respond quickly to ensure smooth continuity of learning with minimal disruption.',
 }
 
 export default function RootLayout({

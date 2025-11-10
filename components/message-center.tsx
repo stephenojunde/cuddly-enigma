@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -95,10 +95,11 @@ export function MessageCenter({ currentUserId, messages: initialMessages, contac
         title: "Message sent!",
         description: `Your message has been sent to ${safeString(selectedContact.full_name)}`,
       })
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Please try again later."
       toast({
         title: "Error sending message",
-        description: error.message || "Please try again later.",
+        description: errorMessage,
         variant: "destructive",
       })
     }
@@ -285,10 +286,12 @@ export function MessageCenter({ currentUserId, messages: initialMessages, contac
           ) : isComposing ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="recipient-select" className="block text-sm font-medium text-gray-700 mb-2">
                   Select Recipient
                 </label>
                 <select
+                  id="recipient-select"
+                  aria-label="Select message recipient"
                   className="w-full p-2 border border-gray-300 rounded-md"
                   onChange={(e) => {
                     const contact = contacts.find(c => c.id === e.target.value)
