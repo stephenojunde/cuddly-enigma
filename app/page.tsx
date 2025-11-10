@@ -5,6 +5,9 @@ import { Star, Users, BookOpen, Award, CheckCircle, ArrowRight, Shield, Clock, F
 import { createClient } from '@/lib/server'
 import { TeacherCard } from '@/components/teacher-card'
 
+// Force dynamic rendering since we use cookies for Supabase
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const supabase = await createClient()
   
